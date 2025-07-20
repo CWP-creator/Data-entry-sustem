@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Data Entry Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Great+Vibes&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --blue: #1e3a8a;
+      --blue-dark: #1e40af;
+      --gray-bg: #f3f6fa;
+      --text-gray: #4b5563;
+      --white: #ffffff;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--gray-bg);
+      color: var(--text-gray);
+      margin: 0;
+    }
+
+    .header {
+      background: var(--blue);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 21px 30px;
+      position: relative;
+    }
+
+    .header .brand {
+      font-weight: 600;
+      font-size: 20px;
+    }
+
+    .header .icons {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .search-bar {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      position: absolute;
+      top: 70px;
+      right: 30px;
+      z-index: 999;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .search-bar.active {
+      display: flex;
+    }
+
+    .search-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      padding: 4px 8px;
+      border-radius: 6px;
+      min-width: 160px;
+    }
+
+    .search-group input {
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 13px;
+      width: 100%;
+    }
+
+    .filter-dropdown {
+      position: relative;
+    }
+
+    .filter-dropdown button {
+      display: flex;
+      align-items: center;
+      background: #f1f5f9;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 6px 8px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .dropdown-list {
+      display: none;
+      position: absolute;
+      top: 95%;
+      left: 0;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      list-style: none;
+      padding: 6px 0;
+      margin-left:-90px;
+      z-index: 999;
+      width: 160px;
+    }
+
+    .dropdown-list li {
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .dropdown-list li:hover {
+      background: #e5f0ff;
+    }
+
+    .sidebar {
+      background: var(--blue);
+      width: 200px;
+      padding: 20px 12px;
+      color: white;
+      position: fixed;
+      top: 68px;
+      bottom: 0;
+      left: 0;
+    }
+
+    .sidebar a {
+      color: white;
+      text-decoration: none;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      font-size: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .sidebar a i {
+      margin-right: 7px;
+    }
+
+    .sidebar a:hover {
+      background: #334155;
+    }
+
+    .main {
+      margin-left: 230px;
+      padding: 30px;
+    }
+
+    .welcome-container {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .welcome {
+      font-family: 'Great Vibes', cursive;
+      font-size: 53px;
+      color: var(--blue-dark);
+    }
+
+    .username {
+      font-weight: 600;
+      font-size: 26px;
+    }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--white);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: #6b7280;
+    }
+
+    .card p {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--blue);
+    }
+
+    .shortcuts h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .shortcut-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 20px;
+    }
+
+    .shortcut {
+      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+    }
+
+    .shortcut:hover {
+      background: #e0ecff;
+    }
+
+    .shortcut i {
+      margin-bottom: 10px;
+    }
+
+    .shortcut span {
+      font-weight: 600;
+      display: block;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .search-bar {
+        right: 10px;
+        left: auto;
+        width: 90%;
+      }
+
+      .dropdown-list {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="brand">📘 My Dashboard</div>
+    <div class="icons">
+      <i data-lucide="search" id="toggleSearch"></i>
+      <i data-lucide="user-circle"></i>
+    </div>
+  </div>
+
+  <div class="search-bar" id="searchBar">
+    <div class="search-group">
+      <i data-lucide="search"></i>
+      <input type="text" placeholder="Search..." />
+    </div>
+    <div class="filter-dropdown">
+      <button id="filterToggle" title="Filter"><i data-lucide="filter"></i></button>
+      <ul class="dropdown-list" id="filterOptions">
+        <li data-value="All">All</li>
+        <li data-value="Contacts">Contacts</li>
+        <li data-value="Bills">Bills</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <a href="#"><i class="sideicon" data-lucide="shopping-cart"></i>Sales</a>
+    <a href="#"><i class="sideicon" data-lucide="package"></i>Purchase</a>
+    <a href="#"><i class="sideicon" data-lucide="file-text"></i>VAT</a>
+    <a href="#"><i class="sideicon" data-lucide="book-open"></i>Ledger</a>
+    <a href="#"><i class="sideicon" data-lucide="calendar"></i>Reports</a>
+    <a href="#"><i class="sideicon" data-lucide="bar-chart-2"></i>Analytics</a>
+  </div>
+
+  <div class="main">
+    <div class="welcome-container">
+      <div class="welcome">Welcome,</div>
+      <div class="username">Pratyush</div>
+    </div>
+
+    <div class="grid-cards">
+      <div class="card"><h3>Today’s Sales</h3><p>Rs. 12,500</p></div>
+      <div class="card"><h3>Today’s Purchases</h3><p>Rs. 8,200</p></div>
+      <div class="card"><h3>Net Cash</h3><p>Rs. 4,300</p></div>
+      <div class="card"><h3>Pending Invoices</h3><p>3</p></div>
+    </div>
+
+    <div class="shortcuts">
+      <h2>Quick Actions</h2>
+      <div class="shortcut-grid">
+        <div class="shortcut"><i data-lucide="file-plus"></i><span>New Sale</span></div>
+        <div class="shortcut"><i data-lucide="shopping-bag"></i><span>New Purchase</span></div>
+        <div class="shortcut"><i data-lucide="user-plus"></i><span>New Customer</span></div>
+        <div class="shortcut"><i data-lucide="calendar-days"></i><span>Monthly Report</span></div>
+        <div class="shortcut"><i data-lucide="search"></i><span>Find Bill</span></div>
+        <div class="shortcut"><i data-lucide="bar-chart"></i><span>View Charts</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+
+      const toggleBtn = document.getElementById("toggleSearch");
+      const searchBar = document.getElementById("searchBar");
+      const filterToggle = document.getElementById("filterToggle");
+      const dropdown = document.getElementById("filterOptions");
+
+      toggleBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        searchBar.classList.toggle("active");
+        dropdown.style.display = "none";
+        lucide.createIcons();
+      });
+
+      filterToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+      });
+
+      dropdown.querySelectorAll("li").forEach(item => {
+        item.addEventListener("click", () => {
+          dropdown.style.display = "none";
+        });
+      });
+
+      document.addEventListener("click", () => {
+        if (searchBar.classList.contains("active")) {
+          searchBar.classList.remove("active");
+          dropdown.style.display = "none";
+        }
+      });
+
+      searchBar.addEventListener("click", (e) => {
+        e.stopPropagation();
+      });
+    });
+  </script>
+</body>
+</html>

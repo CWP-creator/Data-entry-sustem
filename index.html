@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -28,8 +27,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 21px 30px;
-      position: relative;
+      padding: 16px 30px;
+      flex-wrap: wrap;
     }
 
     .header .brand {
@@ -37,92 +36,80 @@
       font-size: 20px;
     }
 
+    .search-filter {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      max-width: 320px;
+      width: 100%;
+    }
+
+    .search-form {
+      display: flex;
+      align-items: center;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 2px 6px;
+      width: 100%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-left: -33px;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      border-right: 1px solid #ccc;
+      padding-right: 6px;
+      margin-right: 6px;
+      color: black;
+    }
+
+    .filter-icon {
+      width: 18px;
+      height: 18px;
+      color: #555;
+    }
+
+    .filter-select {
+      border: none;
+      background: transparent;
+      font-size: 12px;
+      color: #444;
+      outline: none;
+      padding: 4px;
+      cursor: pointer;
+      max-width: 70px;
+    }
+
+    .search-form input {
+      border: none;
+      outline: none;
+      font-size: 14px;
+      padding: 6px 8px;
+      flex: 1;
+      color: var(--text-gray);
+    }
+
+    .search-form button {
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: -8px;
+    }
+
     .header .icons {
       display: flex;
       align-items: center;
       gap: 20px;
       cursor: pointer;
-      position: relative;
-    }
-
-    .search-bar {
-      display: none;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      position: absolute;
-      top: 70px;
-      right: 30px;
-      z-index: 999;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-      transition: all 0.3s ease;
-    }
-
-    .search-bar.active {
-      display: flex;
-    }
-
-    .search-group {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #f1f5f9;
-      padding: 4px 8px;
-      border-radius: 6px;
-      min-width: 160px;
-    }
-
-    .search-group input {
-      border: none;
-      outline: none;
-      background: transparent;
-      font-size: 13px;
-      width: 100%;
-    }
-
-    .filter-dropdown {
-      position: relative;
-    }
-
-    .filter-dropdown button {
-      display: flex;
-      align-items: center;
-      background: #f1f5f9;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 6px 8px;
-      cursor: pointer;
-      font-size: 13px;
-    }
-
-    .dropdown-list {
-      display: none;
-      position: absolute;
-      top: 95%;
-      left: 0;
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      list-style: none;
-      padding: 6px 0;
-      margin-left:-90px;
-      z-index: 999;
-      width: 160px;
-    }
-
-    .dropdown-list li {
-      padding: 8px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .dropdown-list li:hover {
-      background: #e5f0ff;
     }
 
     .sidebar {
@@ -131,7 +118,7 @@
       padding: 20px 12px;
       color: white;
       position: fixed;
-      top: 68px;
+      top: 66px;
       bottom: 0;
       left: 0;
     }
@@ -147,8 +134,9 @@
       margin-bottom: 10px;
     }
 
-    .sidebar a i {
+    .sidebar a svg {
       margin-right: 7px;
+      stroke-width: 1.5;
     }
 
     .sidebar a:hover {
@@ -249,18 +237,122 @@
 
       .header {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+        align-items: stretch;
       }
 
-      .search-bar {
-        right: 10px;
-        left: auto;
-        width: 90%;
-      }
-
-      .dropdown-list {
+      .search-filter {
+        flex-direction: column;
+        align-items: stretch;
+        margin-left: 0;
         width: 100%;
+      }
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 60px auto;
+      padding: 30px;
+      border: 1px solid #888;
+      width: 90%;
+      max-width: 700px;
+      border-radius: 10px;
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    h2.modal-title {
+      margin-bottom: 20px;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .close-btn {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: #333;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full {
+      grid-column: span 2;
+    }
+
+    label {
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="date"] {
+      padding: 10px;
+      font-size: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    input[readonly],
+    input[disabled] {
+      background-color: #f3f3f3;
+    }
+
+    .modal-footer {
+      margin-top: 25px;
+      text-align: center;
+    }
+
+    button[type="submit"] {
+      padding: 14px 40px;
+      font-size: 17px;
+      font-weight: 600;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s ease;
+      cursor: pointer;
+    }
+    button[type="submit"]:hover {
+      background-color: #1e40af;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.full {
+        grid-column: span 1;
       }
     }
   </style>
@@ -268,34 +360,34 @@
 <body>
   <div class="header">
     <div class="brand">📘 My Dashboard</div>
+    <div class="search-filter">
+      <form class="search-form" action="#" method="GET">
+        <div class="filter-group">
+          <i data-lucide="filter" class="filter-icon"></i>
+          <select name="filter" class="filter-select">
+            <option value="all">All</option>
+            <option value="date">Date</option>
+            <option value="amount">Amount</option>
+            <option value="category">Category</option>
+            <option value="type">Type</option>
+          </select>
+        </div>
+        <input type="text" name="query" placeholder="Search..." />
+        <button type="submit"><i data-lucide="search" style="width:14px;height:14px;"></i></button>
+      </form>
+    </div>
     <div class="icons">
-      <i data-lucide="search" id="toggleSearch"></i>
       <i data-lucide="user-circle"></i>
     </div>
   </div>
 
-  <div class="search-bar" id="searchBar">
-    <div class="search-group">
-      <i data-lucide="search"></i>
-      <input type="text" placeholder="Search..." />
-    </div>
-    <div class="filter-dropdown">
-      <button id="filterToggle" title="Filter"><i data-lucide="filter"></i></button>
-      <ul class="dropdown-list" id="filterOptions">
-        <li data-value="All">All</li>
-        <li data-value="Contacts">Contacts</li>
-        <li data-value="Bills">Bills</li>
-      </ul>
-    </div>
-  </div>
-
   <div class="sidebar">
-    <a href="#"><i class="sideicon" data-lucide="shopping-cart"></i>Sales</a>
-    <a href="#"><i class="sideicon" data-lucide="package"></i>Purchase</a>
-    <a href="#"><i class="sideicon" data-lucide="file-text"></i>VAT</a>
-    <a href="#"><i class="sideicon" data-lucide="book-open"></i>Ledger</a>
-    <a href="#"><i class="sideicon" data-lucide="calendar"></i>Reports</a>
-    <a href="#"><i class="sideicon" data-lucide="bar-chart-2"></i>Analytics</a>
+    <a href="#"><i data-lucide="shopping-cart"></i>Sales</a>
+    <a href="#"><i data-lucide="package"></i>Purchase</a>
+    <a href="#"><i data-lucide="file-text"></i>VAT</a>
+    <a href="#"><i data-lucide="book-open"></i>Ledger</a>
+    <a href="#"><i data-lucide="calendar"></i>Reports</a>
+    <a href="#"><i data-lucide="bar-chart-2"></i>Analytics</a>
   </div>
 
   <div class="main">
@@ -305,8 +397,8 @@
     </div>
 
     <div class="grid-cards">
-      <div class="card"><h3>Today’s Sales</h3><p>Rs. 12,500</p></div>
-      <div class="card"><h3>Today’s Purchases</h3><p>Rs. 8,200</p></div>
+      <div class="card"><h3>Monthly’s Sales</h3><p>Rs. 12,500</p></div>
+      <div class="card"><h3>Monthly’s Purchases</h3><p>Rs. 8,200</p></div>
       <div class="card"><h3>Net Cash</h3><p>Rs. 4,300</p></div>
       <div class="card"><h3>Pending Invoices</h3><p>3</p></div>
     </div>
@@ -314,54 +406,142 @@
     <div class="shortcuts">
       <h2>Quick Actions</h2>
       <div class="shortcut-grid">
-        <div class="shortcut"><i data-lucide="file-plus"></i><span>New Sale</span></div>
+        <div class="shortcut" onclick="openModal()"><i data-lucide="file-plus"></i><span>New Sale</span></div>
         <div class="shortcut"><i data-lucide="shopping-bag"></i><span>New Purchase</span></div>
-        <div class="shortcut"><i data-lucide="user-plus"></i><span>New Customer</span></div>
-        <div class="shortcut"><i data-lucide="calendar-days"></i><span>Monthly Report</span></div>
-        <div class="shortcut"><i data-lucide="search"></i><span>Find Bill</span></div>
-        <div class="shortcut"><i data-lucide="bar-chart"></i><span>View Charts</span></div>
+        <div class="shortcut"><i data-lucide="file-text"></i><span>New VAT</span></div>
+        <div class="shortcut"><i data-lucide="list"></i><span>View Sales</span></div>
+        <div class="shortcut"><i data-lucide="archive"></i><span>View Purchases</span></div>
+        <div class="shortcut"><i data-lucide="layers"></i><span>View VAT</span></div>
+      </div>
+    </div>
+
+    <!-- Sales Entry Modal -->
+    <div class="modal" id="salesModal">
+      <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h2 class="modal-title"><i data-lucide="book-open-check"></i> Sales Entry</h2>
+        <form id="salesForm">
+          <div class="form-grid">
+            <div class="form-group"><label for="sn">SN</label><input type="text" id="sn" name="sn" value="170" readonly /></div>
+            <div class="form-group"><label for="billNumber">Bill No</label><input type="number" id="billNumber" name="billNumber" required /></div>
+            <div class="form-group"><label for="dateAD">English Date</label><input type="date" id="dateAD" name="dateAD" required /></div>
+            <div class="form-group"><label for="dateBS">Nepali Date</label><input type="text" id="dateBS" name="dateBS" placeholder="YYYY-MM-DD" required /></div>
+            <div class="form-group"><label for="clientName">Name</label><input type="text" id="clientName" name="clientName" required /></div>
+            <div class="form-group"><label for="panNumber">PAN No</label><input type="text" id="panNumber" name="panNumber" required /></div>
+            <div class="form-group"><label for="amount">Sales Amount</label><input type="number" id="amount" name="amount" required /></div>
+            <div class="form-group"><label for="vatAmount">VAT Amount (13%)</label><input type="number" id="vatAmount" name="vatAmount" disabled /></div>
+            <div class="form-group full"><label for="total">Total (with VAT)</label><input type="number" id="total" name="total" readonly /></div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit">💾 Save</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      lucide.createIcons();
+  document.addEventListener("DOMContentLoaded", () => {
+    lucide.createIcons();
 
-      const toggleBtn = document.getElementById("toggleSearch");
-      const searchBar = document.getElementById("searchBar");
-      const filterToggle = document.getElementById("filterToggle");
-      const dropdown = document.getElementById("filterOptions");
+    const amountInput = document.getElementById("amount");
+    const vatInput = document.getElementById("vatAmount");
+    const totalInput = document.getElementById("total");
+    const snInput = document.getElementById("sn");
+    const salesForm = document.getElementById("salesForm");
+    const saveBtn = salesForm.querySelector("button[type='submit']");
+    const statusMsg = document.createElement("div");
+    statusMsg.style.marginTop = "10px";
+    statusMsg.style.color = "#16a34a";
+    statusMsg.style.fontWeight = "600";
+    statusMsg.style.display = "none";
+    salesForm.querySelector(".modal-footer").appendChild(statusMsg);
 
-      toggleBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        searchBar.classList.toggle("active");
-        dropdown.style.display = "none";
-        lucide.createIcons();
-      });
+    function formatNumber(num) {
+      return Number(num).toLocaleString("en-IN");
+    }
 
-      filterToggle.addEventListener("click", (e) => {
-        e.stopPropagation();
-        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-      });
+    function updateVAT() {
+      let rawValue = amountInput.value.replace(/,/g, "");
+      let amount = parseFloat(rawValue);
+      if (!isNaN(amount)) {
+        let vat = amount * 0.13;
+        let total = amount + vat;
+        vatInput.value = formatNumber(vat.toFixed(2));
+        totalInput.value = formatNumber(total.toFixed(2));
+        amountInput.value = formatNumber(amount.toFixed(2));
+      } else {
+        vatInput.value = "";
+        totalInput.value = "";
+      }
+    }
 
-      dropdown.querySelectorAll("li").forEach(item => {
-        item.addEventListener("click", () => {
-          dropdown.style.display = "none";
-        });
-      });
+    amountInput.addEventListener("input", updateVAT);
 
-      document.addEventListener("click", () => {
-        if (searchBar.classList.contains("active")) {
-          searchBar.classList.remove("active");
-          dropdown.style.display = "none";
-        }
-      });
+    function loadNextSN() {
+      google.script.run.withSuccessHandler(sn => {
+        snInput.value = sn;
+      }).getNextSN();
+    }
 
-      searchBar.addEventListener("click", (e) => {
-        e.stopPropagation();
-      });
+    salesForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saving...";
+
+      statusMsg.style.display = "none";
+
+      const data = {
+        sn: snInput.value,
+        billNumber: this.billNumber.value,
+        dateAD: this.dateAD.value,
+        dateBS: this.dateBS.value,
+        clientName: this.clientName.value,
+        panNumber: this.panNumber.value,
+        amount: this.amount.value.replace(/,/g, ""),
+        vatAmount: this.vatAmount.value.replace(/,/g, ""),
+        total: this.total.value.replace(/,/g, "")
+      };
+
+      google.script.run
+        .withSuccessHandler(() => {
+          // Clear form
+          salesForm.reset();
+          vatInput.value = "";
+          totalInput.value = "";
+          saveBtn.disabled = false;
+          saveBtn.textContent = "💾 Save";
+          statusMsg.textContent = "✅ Saved successfully";
+          statusMsg.style.display = "block";
+          loadNextSN(); // Load next SN after successful save
+        })
+        .withFailureHandler(err => {
+          alert("❌ Couldn't save data: " + err.message);
+          saveBtn.disabled = false;
+          saveBtn.textContent = "💾 Save";
+        })
+        .submitSalesEntry(data);
     });
-  </script>
+
+    window.openModal = function () {
+      document.getElementById("salesModal").style.display = "block";
+      loadNextSN();
+    }
+
+    window.closeModal = function () {
+      document.getElementById("salesModal").style.display = "none";
+      statusMsg.style.display = "none";
+    }
+
+    window.onclick = function (event) {
+      const modal = document.getElementById("salesModal");
+      if (event.target === modal) {
+        closeModal();
+      }
+    };
+  });
+</script>
+
 </body>
 </html>

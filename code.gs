@@ -48,23 +48,75 @@ function submitSalesEntry(data) {
   }
 
   // Ensure numeric values are parsed correctly and commas are removed
-  const salesAmount = Number(data.amount.replace(/,/g, ""));
-  const vatAmount = Number(data.vatAmount.replace(/,/g, ""));
-  const totalAmount = Number(data.total.replace(/,/g, ""));
+  const salesAmount = Number(String(data.amount).replace(/,/g, ""));
+  const vatAmount = Number(String(data.vatAmount).replace(/,/g, ""));
+  const totalAmount = Number(String(data.total).replace(/,/g, ""));
 
   sheet.appendRow([
-    Number(data.sn),           // SN
-    Number(data.billNumber),   // Bill no
-    data.dateAD,               // English Date
-    data.dateBS,               // Nepali Date
-    data.clientName,           // Name
-    data.panNumber,            // Pan no
-    salesAmount,               // Sales
-    vatAmount,                 // Vat
-    totalAmount                // Total
+    Number(data.sn),        // SN (Column A)
+    Number(data.billNumber), // Bill no (Column B)
+    data.dateAD,             // English Date (Column C)
+    data.dateBS,             // Nepali Date (Column D)
+    data.clientName,         // Name (Column E)
+    data.panNumber,          // Pan no (Column F)
+    salesAmount,             // Sales (Column G)
+    vatAmount,               // Vat (Column H)
+    totalAmount              // Total (Column I)
   ]);
   return { success: true, message: "Sales entry saved!" };
 }
+
+/**
+ * Updates an existing sales entry in the "salesbook" sheet.
+ * Finds the record by SN and updates all relevant fields.
+ * @param {Object} data - The sales data object from the client-side, including the SN for lookup.
+ */
+function updateSalesEntry(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("salesbook");
+
+  if (!sheet) {
+    Logger.log("Error: 'salesbook' sheet not found for update.");
+    throw new Error("The 'salesbook' sheet was not found. Please ensure it exists and is correctly named.");
+  }
+
+  const snToUpdate = Number(data.sn);
+  const range = sheet.getDataRange();
+  const values = range.getValues();
+
+  let rowFound = -1;
+  for (let i = 1; i < values.length; i++) { // Start from row 1 to skip headers (index 0)
+    if (Number(values[i][0]) === snToUpdate) { // Assuming SN is in the first column (index 0)
+      rowFound = i;
+      break;
+    }
+  }
+
+  if (rowFound === -1) {
+    throw new Error(`Sales record with SN ${snToUpdate} not found for update.`);
+  }
+
+  // Ensure numeric values are parsed correctly and commas are removed
+  const salesAmount = Number(String(data.amount).replace(/,/g, ""));
+  const vatAmount = Number(String(data.vatAmount).replace(/,/g, ""));
+  const totalAmount = Number(String(data.total).replace(/,/g, ""));
+
+  // Update the row with new data
+  sheet.getRange(rowFound + 1, 1, 1, 9).setValues([[ // rowFound + 1 because sheet rows are 1-indexed
+    Number(data.sn),        // SN (Column A)
+    Number(data.billNumber), // Bill no (Column B)
+    data.dateAD,             // English Date (Column C)
+    data.dateBS,             // Nepali Date (Column D)
+    data.clientName,         // Name (Column E)
+    data.panNumber,          // Pan no (Column F)
+    salesAmount,             // Sales (Column G)
+    vatAmount,               // Vat (Column H)
+    totalAmount              // Total (Column I)
+  ]]);
+
+  return { success: true, message: "Sales entry updated successfully!" };
+}
+
 
 /**
  * Fetches client/supplier names and their PAN numbers from the "Clients" sheet.
@@ -121,35 +173,31 @@ function convertADtoBS(adDateString) {
     return null;
   }
 
-  // Get all AD dates from Column A and BS dates from Column B
   const adDatesRaw = adToBsSheet.getRange(2, 1, lastRow - 1, 1).getValues();
   const bsDatesRaw = adToBsSheet.getRange(2, 2, lastRow - 1, 1).getValues();
 
   for (let i = 0; i < adDatesRaw.length; i++) {
     const adDateValue = adDatesRaw[i][0];
-    const bsDateValue = bsDatesRaw[i][0];
-
-    // Format the AD date from the sheet for comparison
     let sheetAdDateFormatted = null;
+
     if (adDateValue instanceof Date) {
       sheetAdDateFormatted = Utilities.formatDate(adDateValue, timezone, 'yyyy-MM-dd');
     } else {
-      sheetAdDateFormatted = String(adDateValue).trim(); // Treat as string if not a Date object
+      sheetAdDateFormatted = String(adDateValue).trim();
     }
-    
-    // Compare the formatted AD date string with the input adDateString
+
     if (sheetAdDateFormatted === adDateString) {
-      // Format the corresponding BS date to YYYY-MM-DD string before returning
+      const bsDateValue = bsDatesRaw[i][0];
       if (bsDateValue instanceof Date) {
         return Utilities.formatDate(bsDateValue, timezone, 'yyyy-MM-dd');
       } else {
-        return String(bsDateValue).trim(); // Treat as string if not a Date object
+        return String(bsDateValue).trim();
       }
     }
   }
 
   Logger.log("AD date not found in ADTOBS sheet: " + adDateString);
-  return null; // Date not found
+  return null;
 }
 
 /**
@@ -174,35 +222,31 @@ function convertBStoAD(bsDateString) {
     return null;
   }
 
-  // Get all AD dates from Column A and BS dates from Column B
   const adDatesRaw = adToBsSheet.getRange(2, 1, lastRow - 1, 1).getValues();
   const bsDatesRaw = adToBsSheet.getRange(2, 2, lastRow - 1, 1).getValues();
 
   for (let i = 0; i < bsDatesRaw.length; i++) {
-    const adDateValue = adDatesRaw[i][0];
     const bsDateValue = bsDatesRaw[i][0];
-
-    // Format the BS date from the sheet for comparison
     let sheetBsDateFormatted = null;
+
     if (bsDateValue instanceof Date) {
-        sheetBsDateFormatted = Utilities.formatDate(bsDateValue, timezone, 'yyyy-MM-dd');
+      sheetBsDateFormatted = Utilities.formatDate(bsDateValue, timezone, 'yyyy-MM-dd');
     } else {
-        sheetBsDateFormatted = String(bsDateValue).trim(); // Treat as string if not a Date object
+      sheetBsDateFormatted = String(bsDateValue).trim();
     }
 
-    // Compare the formatted BS date string with the input bsDateString
     if (sheetBsDateFormatted === bsDateString) {
-      // Format the corresponding AD date to YYYY-MM-DD string before returning
+      const adDateValue = adDatesRaw[i][0];
       if (adDateValue instanceof Date) {
         return Utilities.formatDate(adDateValue, timezone, 'yyyy-MM-dd');
       } else {
-        return String(adDateValue).trim(); // Treat as string if not a Date object
+        return String(adDateValue).trim();
       }
     }
   }
 
   Logger.log("BS date not found in ADTOBS sheet: " + bsDateString);
-  return null; // Date not found
+  return null;
 }
 
 /**
@@ -216,8 +260,8 @@ function getNextPurchaseSN() {
     throw new Error("The 'purchaseentry' sheet was not found. Cannot generate SN.");
   }
   const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return 1; // No entries yet, start at 1
-  const lastSN = sheet.getRange(lastRow, 1).getValue(); // Assuming SN is in Column 1
+  if (lastRow < 2) return 1;
+  const lastSN = sheet.getRange(lastRow, 1).getValue();
   return (Number(lastSN) || 0) + 1;
 }
 
@@ -235,22 +279,20 @@ function submitPurchaseEntry(data) {
     throw new Error("The 'purchaseentry' sheet was not found. Please ensure it exists and is correctly named.");
   }
 
-  // Ensure numeric values are parsed correctly and commas are removed
-  const purchaseAmount = Number(data.purchaseAmount.replace(/,/g, ""));
-  const vatAmount = Number(data.vatAmount.replace(/,/g, ""));
-  const totalAmount = Number(data.total.replace(/,/g, ""));
+  const purchaseAmount = Number(String(data.purchaseAmount).replace(/,/g, ""));
+  const vatAmount = Number(String(data.vatAmount).replace(/,/g, ""));
+  const totalAmount = Number(String(data.total).replace(/,/g, ""));
 
   let nonVat = '';
   let expenses = '';
   let fixedAssets = '';
   let purchase = '';
-  let totalTaxable = ''; // This will hold the base amount for VAT calculation
+  let totalTaxable = '';
 
-  // Conditional logic based on PurchaseType
   switch (data.purchaseType) {
     case 'Non vat':
       nonVat = purchaseAmount;
-      totalTaxable = 0; // For 'Non vat', totalTaxable is 0
+      totalTaxable = 0;
       expenses = '-';
       fixedAssets = '-';
       purchase = '-';
@@ -267,7 +309,7 @@ function submitPurchaseEntry(data) {
       totalTaxable = purchaseAmount;
       nonVat = '-';
       expenses = '-';
-      purchase = '-';
+      fixedAssets = '-';
       break;
     case 'Purchase':
       purchase = purchaseAmount;
@@ -278,7 +320,6 @@ function submitPurchaseEntry(data) {
       break;
     default:
       Logger.log("Warning: Unknown or empty purchaseType: " + data.purchaseType);
-      // If purchaseType is not explicitly matched, assume it's a regular purchase
       purchase = purchaseAmount;
       totalTaxable = purchaseAmount;
       nonVat = '-';
@@ -288,24 +329,23 @@ function submitPurchaseEntry(data) {
   }
 
   sheet.appendRow([
-    Number(data.sn),             // SN
-    Number(data.billNumber),     // Bill no
-    data.dateAD,                 // English Date
-    data.dateBS,                 // Nepali Date
-    data.supplierName,           // Name
-    data.supplierPanNumber,      // Pan no
-    nonVat,                      // Non vat
-    expenses,                    // Expenses
-    fixedAssets,                 // Fixed assets
-    purchase,                    // Purchase
-    data.purchaseType,           // PurchaseType
-    totalTaxable,                // Total taxable (this is the base amount for VAT)
-    vatAmount,                   // Vat
-    totalAmount                  // Total
+    Number(data.sn),           // SN
+    Number(data.billNumber),   // Bill no
+    data.dateAD,               // English Date
+    data.dateBS,               // Nepali Date
+    data.supplierName,         // Name
+    data.supplierPanNumber,    // Pan no
+    nonVat,                    // Non vat
+    expenses,                  // Expenses
+    fixedAssets,               // Fixed assets
+    purchase,                  // Purchase
+    data.purchaseType,         // PurchaseType
+    totalTaxable,              // Total taxable
+    vatAmount,                 // Vat
+    totalAmount                // Total
   ]);
   return { success: true, message: "Purchase entry saved!" };
 }
-
 
 // --- NEW FUNCTIONS FOR VAT NO ENTRY ---
 
@@ -319,16 +359,15 @@ function getNextVatSN() {
   }
   const externalSs = SpreadsheetApp.openById(VAT_NO_SPREADSHEET_ID);
   const sheet = externalSs.getSheetByName('database'); // Assuming a sheet named "database" within "VAT NO" spreadsheet
-  
+
   if (!sheet) {
     Logger.log("Error: 'database' sheet not found in external 'VAT NO' spreadsheet for SN generation.");
     throw new Error("The 'database' sheet was not found in the external 'VAT NO' spreadsheet. Cannot generate SN.");
   }
 
   const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return 1; // No entries yet, start at 1
-  
-  // Assuming SN is in Column 1 (A)
+  if (lastRow < 2) return 1;
+
   const lastSN = sheet.getRange(lastRow, 1).getValue();
   return (Number(lastSN) || 0) + 1;
 }
@@ -339,7 +378,7 @@ function getNextVatSN() {
  * @return {string|null} The client's name if found, otherwise null.
  */
 function getClientNameByPan(pan) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet(); // This looks in the active spreadsheet
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
   const clientsSheet = ss.getSheetByName("Clients");
 
   if (!clientsSheet) {
@@ -349,20 +388,18 @@ function getClientNameByPan(pan) {
 
   const lastRow = clientsSheet.getLastRow();
   if (lastRow < 2) {
-    return null; // No data rows to search
+    return null;
   }
 
-  // Get all PANs from Column B and Names from Column C
-  const panNumbers = clientsSheet.getRange(2, 2, lastRow - 1, 1).getValues(); // Column B for PAN
-  const clientNames = clientsSheet.getRange(2, 3, lastRow - 1, 1).getValues(); // Column C for Name
+  const panNumbers = clientsSheet.getRange(2, 2, lastClientRow - 1, 1).getValues(); // Column B for PAN
+  const clientNames = clientsSheet.getRange(2, 3, lastClientRow - 1, 1).getValues(); // Column C for Name
 
   for (let i = 0; i < panNumbers.length; i++) {
-    // Ensure both PAN from sheet and input PAN are treated as strings for accurate comparison
     if (String(panNumbers[i][0]).trim() === String(pan).trim()) {
       return clientNames[i][0] ? String(clientNames[i][0]).trim() : null;
     }
   }
-  return null; // PAN not found
+  return null;
 }
 
 /**
@@ -377,12 +414,12 @@ function submitVatEntry(data) {
   if (VAT_NO_SPREADSHEET_ID === 'YOUR_VAT_NO_SPREADSHEET_ID_HERE' || !VAT_NO_SPREADSHEET_ID) {
     throw new Error("VAT_NO_SPREADSHEET_ID is not configured. Please update code.gs with your VAT NO Spreadsheet ID.");
   }
-  
-  const activeSs = SpreadsheetApp.getActiveSpreadsheet(); // For Clients sheet
+
+  const activeSs = SpreadsheetApp.getActiveSpreadsheet();
   const clientsSheet = activeSs.getSheetByName("Clients");
 
-  const externalSs = SpreadsheetApp.openById(VAT_NO_SPREADSHEET_ID); // Open external VAT NO spreadsheet
-  const vatNoSheet = externalSs.getSheetByName("database"); // Get 'database' sheet from it
+  const externalSs = SpreadsheetApp.openById(VAT_NO_SPREADSHEET_ID);
+  const vatNoSheet = externalSs.getSheetByName("database");
 
   if (!vatNoSheet) {
     Logger.log("Error: 'database' sheet not found in external 'VAT NO' spreadsheet for saving.");
@@ -396,40 +433,78 @@ function submitVatEntry(data) {
   // 1. Save to "database" sheet in the external "VAT NO" spreadsheet
   vatNoSheet.appendRow([
     Number(data.sn),
-    String(data.panNumber).trim(), // Ensure PAN is stored as string
-    String(data.name).trim() // Ensure Name is stored as string
+    String(data.panNumber).trim(),
+    String(data.name).trim()
   ]);
   Logger.log(`Saved VAT entry to external 'VAT NO' spreadsheet, sheet 'database'. SN: ${data.sn}, PAN: ${data.panNumber}, Name: ${data.name}`);
 
-
   // 2. Update/Add to "Clients" sheet in the active spreadsheet
-  const clientPans = clientsSheet.getRange(2, 2, clientsSheet.getLastRow() - 1, 1).getValues(); // Column B
+  const lastClientRow = clientsSheet.getLastRow();
+  const clientPans = (lastClientRow > 1) ? clientsSheet.getRange(2, 2, lastClientRow - 1, 1).getValues() : []; // Column B for PAN
   let foundRow = -1;
+
   for (let i = 0; i < clientPans.length; i++) {
-    // Compare PAN numbers as strings
     if (String(clientPans[i][0]).trim() === String(data.panNumber).trim()) {
-      foundRow = i + 2; // +2 because getRange is 0-indexed relative to start, and data starts from row 2
+      foundRow = i + 2;
       break;
     }
   }
 
   if (foundRow !== -1) {
-    // PAN found, update existing name if different
     const existingName = String(clientsSheet.getRange(foundRow, 3).getValue()).trim(); // Column C
     if (existingName !== String(data.name).trim()) {
-      clientsSheet.getRange(foundRow, 3).setValue(String(data.name).trim()); // Update name
+      clientsSheet.getRange(foundRow, 3).setValue(String(data.name).trim());
       Logger.log(`Updated name for PAN ${data.panNumber} in Clients sheet (active spreadsheet).`);
     }
   } else {
-    // PAN not found, add new entry to Clients sheet
-    // Assumes new entries go to the end, and columns are B for PAN, C for Name
-    // Assuming Column A is not used or can be left empty for new client entries.
     clientsSheet.appendRow(['', String(data.panNumber).trim(), String(data.name).trim()]);
     Logger.log(`Added new client/supplier for PAN ${data.panNumber} to Clients sheet (active spreadsheet).`);
   }
 
   return { success: true, message: "VAT entry saved and client data updated!" };
 }
+
+/**
+ * Fetches the last 'count' sales records from the 'salesbook' sheet.
+ * @param {number} count The number of recent records to fetch.
+ * @return {Array<Array<any>>} An array of arrays, where each inner array represents a row of sales data.
+ * The order of columns in the returned array will match the order in the 'salesbook' sheet (A to I).
+ */
+function getRecentSalesRecords(count) { // Added 'count' parameter
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("salesbook"); // Changed to salesbook (lowercase)
+  if (!sheet) {
+    throw new Error("Sheet 'salesbook' not found");
+  }
+
+  const data = sheet.getDataRange().getValues();
+  console.info("Total rows: " + data.length);
+
+  if (data.length <= 1) return []; // No data (only headers)
+
+  const rows = data.slice(1).reverse(); // Skip header and reverse for recent
+  const recordsToReturn = rows.slice(0, count).map(row => [ // Use 'count' here
+    row[0], // SN
+    row[1], // Bill No
+    formatDate(row[2]), // Date (AD)
+    formatDate(row[3]), // Date (BS)
+    row[4], // Name (Corrected column index based on typical spreadsheet structure)
+    row[5], // Pan No (Corrected column index)
+    row[6], // Sales Amount
+    row[7], // VAT
+    row[8]  // Total
+  ]);
+
+  console.info("Records fetched: " + recordsToReturn.length);
+  return recordsToReturn;
+}
+
+function formatDate(date) {
+  if (Object.prototype.toString.call(date) === '[object Date]' && !isNaN(date)) {
+    return Utilities.formatDate(date, Session.getScriptTimeZone(), "yyyy-MM-dd");
+  }
+  return date;
+}
+
 
 // Helper functions (already present, keeping for completeness)
 function extractMonth(dateString) {
@@ -442,4 +517,111 @@ function extractDay(dateString) {
   if (!dateString) return null;
   const parts = dateString.split('-');
   return parseInt(parts[2], 10);
+}
+
+/**
+ * Fetches the last 'count' purchase records from the 'purchaseentry' sheet.
+ * @param {number} count The number of recent records to fetch.
+ * @return {Array<Array<any>>} An array of arrays, where each inner array represents a row of purchase data.
+ */
+function getRecentPurchaseRecords(count) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("purchaseentry");
+  if (!sheet) {
+    throw new Error("Sheet 'purchaseentry' not found");
+  }
+
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return []; // No data (only headers)
+
+  const rows = data.slice(1).reverse(); // Skip header and reverse for recent
+  
+  // Return the most recent records up to the specified count
+  const recordsToReturn = rows.slice(0, count);
+  return recordsToReturn;
+}
+
+/**
+ * Updates an existing purchase entry in the "purchaseentry" sheet.
+ * @param {Object} data - The purchase data object from the client-side, including the SN for lookup.
+ */
+function updatePurchaseEntry(data) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("purchaseentry");
+  if (!sheet) {
+    throw new Error("The 'purchaseentry' sheet was not found for update.");
+  }
+
+  const snToUpdate = Number(data.sn);
+  const range = sheet.getDataRange();
+  const values = range.getValues();
+
+  let rowFound = -1;
+  for (let i = 1; i < values.length; i++) { // Start from row 1 to skip headers
+    if (Number(values[i][0]) === snToUpdate) { // SN is in the first column (index 0)
+      rowFound = i;
+      break;
+    }
+  }
+
+  if (rowFound === -1) {
+    throw new Error(`Purchase record with SN ${snToUpdate} not found for update.`);
+  }
+
+  // Recalculate amounts based on purchase type, same as in submitPurchaseEntry
+  const purchaseAmount = Number(String(data.purchaseAmount).replace(/,/g, ""));
+  const vatAmount = Number(String(data.vatAmount).replace(/,/g, ""));
+  const totalAmount = Number(String(data.total).replace(/,/g, ""));
+
+  let nonVat = '';
+  let expenses = '';
+  let fixedAssets = '';
+  let purchase = '';
+  let totalTaxable = '';
+
+  switch (data.purchaseType) {
+    case 'Non vat':
+      nonVat = purchaseAmount;
+      totalTaxable = 0;
+      expenses = '-'; fixedAssets = '-'; purchase = '-';
+      break;
+    case 'Expenses':
+      expenses = purchaseAmount;
+      totalTaxable = purchaseAmount;
+      nonVat = '-'; fixedAssets = '-'; purchase = '-';
+      break;
+    case 'Fixed assets':
+      fixedAssets = purchaseAmount;
+      totalTaxable = purchaseAmount;
+      nonVat = '-'; expenses = '-'; purchase = '-';
+      break;
+    case 'Purchase': // This case was 'Purchase (Goods)' in the form
+    default:
+      purchase = purchaseAmount;
+      totalTaxable = purchaseAmount;
+      nonVat = '-'; expenses = '-'; fixedAssets = '-';
+      break;
+  }
+   if (data.purchaseType === 'Fixed assets') { // A small correction from your original code
+      fixedAssets = purchaseAmount;
+    }
+
+  // Update the row with new data (14 columns total)
+  sheet.getRange(rowFound + 1, 1, 1, 14).setValues([[
+    Number(data.sn),           // SN
+    Number(data.billNumber),   // Bill no
+    data.dateAD,               // English Date
+    data.dateBS,               // Nepali Date
+    data.supplierName,         // Name
+    data.supplierPanNumber,    // Pan no
+    nonVat,                    // Non vat (Col G)
+    expenses,                  // Expenses (Col H)
+    fixedAssets,               // Fixed assets (Col I)
+    purchase,                  // Purchase (Col J)
+    data.purchaseType,         // PurchaseType (Col K)
+    totalTaxable,              // Total taxable (Col L)
+    vatAmount,                 // Vat (Col M)
+    totalAmount                // Total (Col N)
+  ]]);
+
+  return { success: true, message: "Purchase entry updated successfully!" };
 }

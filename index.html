@@ -31,7 +31,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 30px;
+            padding: 20px 30px;
             flex-wrap: wrap;
             position: fixed; /* Keep header at top */
             width: 100%;
@@ -198,36 +198,43 @@
         }
 
         .sidebar {
-            background: var(--blue);
-            width: 200px;
-            padding: 20px 12px;
-            color: white;
-            position: fixed;
-            top: 66px; /* Adjusted to sit below the header */
-            bottom: 0;
-            left: 0;
-            overflow-y: auto; /* Enable scrolling for long content */
-        }
+    background: #1e3a8a; /* --blue variable */
+    width: 200px;
+    padding: 20px 12px;
+    color: white;
+    position: fixed;
+    top: 66px;
+    bottom: 0;
+    left: 0;
+    overflow-y: auto;
+}
 
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            font-size: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s ease;
+}
 
-        .sidebar a svg {
-            margin-right: 7px;
-            stroke-width: 1.5;
-        }
+.sidebar a.active {
+    background: #1e40af; /* --blue-dark variable */
+    font-weight: 600;
+}
 
-        .sidebar a:hover {
-            background: #334155;
-        }
+.sidebar a svg {
+    margin-right: 7px;
+    stroke-width: 1.5;
+}
+
+.sidebar a:hover {
+    background: #334155;
+}
+
 
         .main {
             margin-left: 230px; /* Adjusted for new sidebar width */
@@ -645,32 +652,18 @@
 <body>
     <div class="header">
         <div class="brand">📘 My Dashboard</div>
-        <div class="search-filter">
-            <form class="search-form" action="#" method="GET">
-                <div class="filter-group">
-                    <i data-lucide="filter" class="filter-icon"></i>
-                    <select name="filter" class="filter-select">
-                        <option value="all">All</option>
-                        <option value="date">Date</option>
-                        <option value="amount">Amount</option>
-                        <option value="category">Category</option>
-                        <option value="type">Type</option>
-                    </select>
-                </div>
-                <input type="text" name="query" placeholder="Search..." />
-                <button type="submit1"><i data-lucide="search" style="width:14px;height:14px;"></i></button>
-            </form>
-        </div>
     </div>
 
-    <div class="sidebar">
-        <a href="#"><i data-lucide="shopping-cart"></i>Sales</a>
-        <a href="#"><i data-lucide="package"></i>Purchase</a>
-        <a href="#"><i data-lucide="file-text"></i>VAT</a>
-        <a href="#"><i data-lucide="book-open"></i>Ledger</a>
-        <a href="#"><i data-lucide="calendar"></i>Reports</a>
-        <a href="#"><i data-lucide="bar-chart-2"></i>Analytics</a>
-    </div>
+<div class="sidebar">
+    <a href="main_dashboard.html" class="active"><i data-lucide="layout-dashboard"></i>Dashboard</a>
+    <a href="new_sales_page.html"><i data-lucide="shopping-cart"></i>Sales</a>
+    <a href="#"><i data-lucide="package"></i>Purchase</a>
+    <a href="#"><i data-lucide="file-text"></i>VAT</a>
+    <a href="#"><i data-lucide="book-open"></i>Ledger</a>
+    <a href="#"><i data-lucide="calendar"></i>Reports</a>
+    <a href="#"><i data-lucide="bar-chart-2"></i>Analytics</a>
+</div>
+
 
     <div class="main">
         <div class="welcome-container">
@@ -703,10 +696,10 @@
                 <div class="shortcut" id="viewPurchasesShortcut" onclick="toggleViewPurchaseTable()">
                     <i data-lucide="archive"></i><span>View Purchases</span>
                 </div>
-                <div class="shortcut">
+                <div class="shortcut" id="viewVatShortcut" onclick="toggleViewVatTable()">
                     <i data-lucide="layers"></i><span>View VAT</span>
                 </div>
-            </div>
+                </div>
         </div>
 
         <div class="sales-table-container" id="salesTableContainer" style="display: none;">
@@ -720,10 +713,11 @@
                             <th>Date (AD)</th>
                             <th>Date (BS)</th>
                             <th>Name</th>
+                            <th>PAN No</th>
                             <th>Sales Amount</th>
                             <th>VAT Amount</th>
                             <th>Total</th>
-                            <th>Edit</th> <!-- Changed from Actions to Edit -->
+                            <th>Edit</th> 
                         </tr>
                     </thead>
                     <tbody id="salesTableBody">
@@ -754,7 +748,6 @@
                         </tr>
                     </thead>
                     <tbody id="purchaseTableBody">
-                        <!-- Purchase records will be loaded here -->
                     </tbody>
                 </table>
             </div>
@@ -763,6 +756,26 @@
             </div>
         </div>
 
+        <div class="sales-table-container" id="vatTableContainer" style="display: none;">
+            <h2>Recent VAT Entries</h2>
+            <div class="table-responsive">
+                <table class="sales-table">
+                    <thead>
+                        <tr>
+                            <th>SN</th>
+                            <th>PAN Number</th>
+                            <th>Name</th>
+                            <th>Edit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vatTableBody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer" id="viewMoreVatContainer" style="display: none; margin-top: 15px;">
+                <button id="viewMoreVatBtn" class="view-more-btn">View More Results</button>
+            </div>
+        </div>
         <div class="modal" id="salesModal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeSalesModal()">&times;</span>
@@ -895,6 +908,7 @@
                 <span class="close-btn" onclick="closeVatModal()">&times;</span>
                 <h2 class="modal-title"><i data-lucide="file-text"></i> VAT No Entry Form</h2>
                 <form id="vatForm">
+                    <input type="hidden" id="isVatEditMode" value="false" />
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="vatSn">Serial Number:</label>
@@ -942,8 +956,7 @@
             let choicesInstance;
             let supplierMap = {};
             let purchaseChoicesInstance;
-            let purchaseRecordsToShow = 10;
-
+            
 
             // --- Sales Modal Elements ---
             const salesModal = document.getElementById("salesModal");
@@ -991,6 +1004,7 @@
             const purchaseForm = document.getElementById("purchaseForm");
             const savePurchaseBtn = purchaseForm.querySelector("button[type='submit']");
             const purchaseStatusMsg = document.createElement("div");
+            let purchaseRecordsToShow = 10;
             purchaseStatusMsg.style.marginTop = "10px";
             purchaseStatusMsg.style.color = "#16a34a";
             purchaseStatusMsg.style.fontWeight = "600";
@@ -1011,6 +1025,15 @@
             vatStatusMsg.style.fontWeight = "600";
             vatStatusMsg.style.display = "none";
             vatForm.querySelector(".modal-footer").appendChild(vatStatusMsg);
+            
+            // START OF CHANGE: VAT Table and "View More" Elements
+            const vatTableContainer = document.getElementById("vatTableContainer");
+            const vatTableBody = document.getElementById("vatTableBody");
+            const viewMoreVatContainer = document.getElementById("viewMoreVatContainer");
+            const viewMoreVatBtn = document.getElementById("viewMoreVatBtn");
+            let vatRecordsToShow = 10;
+            // END OF CHANGE
+
 
             // Helper function to format numbers with commas
             function formatNumber(num) {
@@ -1049,101 +1072,94 @@
 
             function loadSalesRecords(count) {
                 if (count <= 10) {
-                    salesTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">Loading recent sales records...</td></tr>`;
+                    salesTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">Loading recent sales records...</td></tr>`;
                 }
                 viewMoreBtn.textContent = "Loading...";
 
                 google.script.run
                     .withSuccessHandler(function(records) {
-                        salesTableBody.innerHTML = ''; 
+                        if (count <= 10) salesTableBody.innerHTML = ''; 
 
                         if (!records || records.length === 0) {
-                            salesTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No recent sales records found.</td></tr>`;
+                            salesTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No recent sales records found.</td></tr>`;
                             viewMoreContainer.style.display = "none"; 
                             return;
                         }
+                        
+                        // To prevent duplicating rows on "View More", clear the table body only for the initial load.
+                        if (count <= 10) {
+                           salesTableBody.innerHTML = '';
+                        } else {
+                           // For subsequent loads, we append, so we find where to start.
+                           const existingRows = salesTableBody.rows.length;
+                           records = records.slice(existingRows);
+                        }
+
 
                         records.forEach(rowData => {
                             const row = salesTableBody.insertRow();
                             row.insertCell().textContent = rowData[0]; // SN
                             row.insertCell().textContent = rowData[1]; // Bill No
                             row.insertCell().textContent = formatDateToYYYYMMDD(rowData[2]); // Date (AD)
-                            // Assuming rowData[3] (Date BS) is already in YYYY-MM-DD string format
                             row.insertCell().textContent = rowData[3]; // Date (BS)
                             row.insertCell().textContent = rowData[4]; // Name
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[6]); // Sales Amount (Corrected index to 6)
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[7]); // VAT (Corrected index to 7)
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[8]); // Total (Corrected index to 8)
-
+                            row.insertCell().textContent = rowData[5]; // PAN No
+                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[6]); // Sales Amount 
+                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[7]); // VAT 
+                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[8]); // Total 
+                            
                             const actionCell = row.insertCell();
                             actionCell.style.textAlign = 'center';
-                            // Changed to a button with text and icon
                             actionCell.innerHTML = `<button class="edit-button"><i data-lucide="edit-2"></i>Edit</button>`;
                             const editButton = actionCell.querySelector('.edit-button');
                             lucide.createIcons({ nodes: [editButton.querySelector('svg')] });
 
                             editButton.addEventListener('click', () => {
-                                // Call the new confirmation function
                                 confirmEditSalesRecord(rowData);
                             });
                         });
                         
                         viewMoreContainer.style.display = "block";
                         viewMoreBtn.textContent = "View More Results";
-                        viewMoreBtn.style.display = (records.length < count) ? 'none' : 'inline-block';
+                        viewMoreBtn.style.display = (records.length < 5 && count > 10) ? 'none' : 'inline-block';
 
                     })
                     .withFailureHandler(function(error) {
                         console.error("Error loading sales records:", error);
-                        salesTableBody.innerHTML = `<tr><td colspan="9" style="color:red; text-align:center;">Error loading records: ${error.message}</td></tr>`;
+                        salesTableBody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Error loading records: ${error.message}</td></tr>`;
                         viewMoreBtn.textContent = "View More Results";
                     })
                     .getRecentSalesRecords(count);
             }
 
-            // New confirmation function
             function confirmEditSalesRecord(rowData) {
-                const billNo = rowData[1]; // Bill No is at index 1
+                const billNo = rowData[1];
                 const message = `Do you want to edit sales voucher no ${billNo}?`;
 
-                // Custom display function for confirmation
                 displayConfirmBox(message, () => {
-                    // Yes button clicked
                     editSalesRecord(rowData);
-                }, () => {
-                    // No button clicked (do nothing, just close)
-                    console.log("Edit cancelled.");
                 });
             }
 
 
             function editSalesRecord(rowData) {
-                // Log the rowData to inspect its contents
-                console.log("Row Data for Edit:", rowData);
-
                 const [sn, billNo, dateAD, dateBS, clientName, panNumber, salesAmount, vatAmount, totalAmount] = rowData;
 
-                // Call openSalesModal and await its completion to ensure clients are loaded
-                openSalesModal(true).then(() => { // Now openSalesModal is async, so we can chain .then()
+                openSalesModal(true).then(() => { 
                     document.getElementById('sn').value = sn;
                     document.getElementById('billNumber').value = billNo;
                     document.getElementById('dateAD').value = formatDateToYYYYMMDD(dateAD);
                     document.getElementById('dateBS').value = dateBS;
                     
-                    // Now choicesInstance should be ready
                     if (choicesInstance) {
-                      choicesInstance.setChoiceByValue(clientName);
-                    } else {
-                        // Fallback (though this path should ideally not be hit now)
-                        document.getElementById('clientName').value = clientName;
-                    }
+                      choicesInstance.setChoiceByValue(String(clientName ||'').trim());
+                    } 
 
                     document.getElementById('panNumber').value = panNumber;
-                    document.getElementById('amount').value = formatNumber(salesAmount); // Format on load
+                    document.getElementById('amount').value = formatNumber(salesAmount); 
                     document.getElementById('vatAmount').value = formatNumber(vatAmount);
                     document.getElementById('total').value = formatNumber(totalAmount);
 
-                    // Also, re-trigger VAT calculation to ensure formatted numbers are correct
                     updateSalesVAT();
                 });
             }
@@ -1156,7 +1172,6 @@
 
             // --- Sales Form Logic ---
             function updateSalesVAT() {
-                // Remove commas for calculation
                 let rawValue = amountInput.value.replace(/,/g, "");
                 let amount = parseFloat(rawValue);
                 if (!isNaN(amount)) {
@@ -1164,25 +1179,22 @@
                     let total = amount + vat;
                     vatInput.value = formatNumber(vat);
                     totalInput.value = formatNumber(total);
-                    // Do NOT reformat amountInput.value here while typing
                 } else {
                     vatInput.value = "";
                     totalInput.value = "";
-                    // Keep amountInput.value as is, or clear if completely invalid
                     if (rawValue === "") {
                         amountInput.value = "";
                     }
                 }
             }
             amountInput.addEventListener("input", updateSalesVAT);
-            // Add blur listener to format amountInput when user finishes typing
             amountInput.addEventListener("blur", function() {
                 let rawValue = this.value.replace(/,/g, "");
                 let amount = parseFloat(rawValue);
                 if (!isNaN(amount) && rawValue !== "") {
                     this.value = formatNumber(amount);
                 } else if (rawValue === "") {
-                    this.value = ""; // Clear if empty after blur
+                    this.value = ""; 
                 }
             });
 
@@ -1213,51 +1225,45 @@
                     total: totalInput.value.replace(/,/g, "")
                 };
 
-                // This function will be called on both success and failure to reset the button state.
                 function resetSaveButton() {
                     saveSalesBtn.disabled = false;
                     saveSalesBtn.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save';
                 }
 
-                // This is the callback function that runs if the server-side operation is successful.
-                const successCallback = () => {
+                const successCallback = (response) => {
                     const successMessage = isUpdate ? "✅ Updated successfully" : "✅ Saved successfully";
                     
                     if (isUpdate) {
-                        // For updates, show a pop-up message and close the modal after a short delay.
                         displayMessageBox(successMessage, 'info');
                         setTimeout(() => {
                             closeSalesModal();
-                            loadSalesRecords(recordsToShow); // Refresh the sales table
+                            loadSalesRecords(recordsToShow); 
                         }, 1500);
                     } else {
-                        // For new entries, reset the form and show the message inside the modal.
                         salesForm.reset();
                         vatInput.value = "";
                         totalInput.value = "";
                         document.getElementById("panNumber").value = "";
                         if (choicesInstance) choicesInstance.destroy();
-                        loadClients(); // Reload client dropdown
+                        loadClients();
                         adConversionStatus.style.display = "none";
                         bsConversionStatus.style.display = "none";
                         salesStatusMsg.textContent = successMessage;
                         salesStatusMsg.style.display = "block";
                         loadNextSalesSN();
                         if (salesTableContainer.style.display === "block") {
-                            loadSalesRecords(recordsToShow); // Refresh table if it's visible
+                            loadSalesRecords(recordsToShow);
                         }
                     }
-                    resetSaveButton(); // Reset the button state on success.
+                    resetSaveButton();
                 };
 
-                // This is the callback function that runs if there's an error.
                 const failureCallback = (err) => {
                     const action = isUpdate ? "update" : "save";
                     displayMessageBox(`❌ Couldn't ${action} data: ${err.message}`, "error");
-                    resetSaveButton(); // Also reset the button state on failure.
+                    resetSaveButton();
                 };
 
-                // Now, call the correct server function with the handlers attached.
                 if (isUpdate) {
                     google.script.run
                         .withSuccessHandler(successCallback)
@@ -1271,7 +1277,7 @@
                 }
             });
 
-            window.openSalesModal = async function (isEdit = false) { // Made async
+            window.openSalesModal = async function (isEdit = false) { 
                 document.getElementById("isEditMode").value = isEdit;
                 salesModal.style.display = "flex";
 
@@ -1281,7 +1287,7 @@
                     dateBSInput.value = '';
                 }
                 
-                await loadClients(); // Await client loading for Choices.js
+                await loadClients();
 
                 saveSalesBtn.textContent = isEdit ? '🔄 Update & Save' : '💾 Save';
                 adConversionStatus.style.display = "none";
@@ -1293,7 +1299,7 @@
                 salesStatusMsg.style.display = "none";
                 salesForm.reset();
                 if (choicesInstance) {
-                    choicesInstance.destroy(); // Destroy Choices.js instance
+                    choicesInstance.destroy(); 
                 }
                 document.getElementById("panNumber").value = "";
                 amountInput.value = "";
@@ -1303,7 +1309,6 @@
                 saveSalesBtn.textContent = "💾 Save";
                 adConversionStatus.style.display = "none";
                 bsConversionStatus.style.display = "none";
-                // Removed automatic message box removal
             };
 
 
@@ -1375,7 +1380,7 @@
                     google.script.run.withSuccessHandler(function(clientData) {
                         const select = document.getElementById("clientName");
                         if (choicesInstance) {
-                            choicesInstance.destroy(); // Destroy existing instance before re-populating
+                            choicesInstance.destroy(); 
                         }
                         select.innerHTML = "";
                         clientMap = {};
@@ -1420,7 +1425,6 @@
                         purchaseVatAmountInput.value = formatNumber(vat);
                         purchaseTotalInput.value = formatNumber(total);
                     }
-                    // Do NOT reformat purchaseAmountInput.value here while typing
                 } else {
                     purchaseVatAmountInput.value = "";
                     purchaseTotalInput.value = "";
@@ -1430,7 +1434,6 @@
                 }
             }
             purchaseAmountInput.addEventListener("input", updatePurchaseVAT);
-            // Add blur listener for purchaseAmountInput
             purchaseAmountInput.addEventListener("blur", function() {
                 let rawValue = this.value.replace(/,/g, "");
                 let amount = parseFloat(rawValue);
@@ -1449,32 +1452,35 @@
             }
 
             function loadSuppliers() {
-                google.script.run.withSuccessHandler(function(supplierData) {
-                    const select = document.getElementById("supplierName");
-                    if (purchaseChoicesInstance) {
-                        purchaseChoicesInstance.destroy();
-                    }
-                    select.innerHTML = "";
-                    supplierMap = {};
-                    select.appendChild(new Option('-- Select Supplier --', ''));
-                    supplierData.forEach(function([name, pan]) {
-                        if (name && pan) {
-                            select.appendChild(new Option(name, name));
-                            supplierMap[name] = pan;
-                        }
-                    });
-                    purchaseChoicesInstance = new Choices(select, {
-                        searchEnabled: true,
-                        itemSelectText: "",
-                        shouldSort: false
-                    });
-                    select.addEventListener("change", function () {
-                        supplierPanNumberInput.value = supplierMap[this.value] || "";
-                    });
-                }).withFailureHandler(function(error) {
-                    console.error("Error loading suppliers:", error);
-                    displayMessageBox("❌ Error loading suppliers: " + error.message, "error");
-                }).getClientList();
+                return new Promise((resolve, reject) => {
+                    google.script.run
+                        .withSuccessHandler(function(supplierData) {
+                            const select = document.getElementById("supplierName");
+                            if (purchaseChoicesInstance) {
+                                purchaseChoicesInstance.destroy();
+                            }
+                            select.innerHTML = "";
+                            supplierMap = {};
+                            select.appendChild(new Option("-- Select Supplier --", ""));
+                            supplierData.forEach(function([name, pan]) {
+                                if (name && pan) {
+                                    select.appendChild(new Option(name, name));
+                                    supplierMap[name] = pan;
+                                }
+                            });
+                            purchaseChoicesInstance = new Choices(select, {
+                                searchEnabled: true,
+                                itemSelectText: "",
+                                shouldSort: false,
+                            });
+                            select.addEventListener("change", function() {
+                                supplierPanNumberInput.value = supplierMap[this.value] || "";
+                            });
+                            resolve(); 
+                        })
+                        .withFailureHandler(reject) 
+                        .getClientList();
+                });
             }
 
             // --- Purchase Table Logic ---
@@ -1484,7 +1490,7 @@
                 const isVisible = purchaseTableContainer.style.display === "block";
 
                 if (!isVisible) {
-                    purchaseRecordsToShow = 10; // Reset count when opening
+                    purchaseRecordsToShow = 10; 
                     purchaseTableContainer.style.display = "block";
                     viewPurchasesShortcut.querySelector("span").textContent = "Hide Purchases";
                     loadPurchaseRecords(purchaseRecordsToShow);
@@ -1509,7 +1515,7 @@
 
                 google.script.run
                     .withSuccessHandler(function(records) {
-                        purchaseTableBody.innerHTML = ''; 
+                        if (count <= 10) purchaseTableBody.innerHTML = ''; 
 
                         if (!records || records.length === 0) {
                             purchaseTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No recent purchase records found.</td></tr>`;
@@ -1519,8 +1525,14 @@
 
                         records.forEach(rowData => {
                             const row = purchaseTableBody.insertRow();
-                            const purchaseAmount = rowData[6] || rowData[7] || rowData[8] || rowData[9];
-
+                            let purchaseAmount = 0;
+                            const purchaseType = rowData[10]; 
+                            switch (purchaseType) {
+                                case 'Purchase': purchaseAmount = rowData[9]; break;
+                                case 'Expenses': purchaseAmount = rowData[7]; break;
+                                case 'Fixed assets': purchaseAmount = rowData[8]; break;
+                                case 'Non vat': purchaseAmount = rowData[6]; break;
+                            }
                             row.insertCell().textContent = rowData[0]; // SN
                             row.insertCell().textContent = rowData[1]; // Bill No
                             row.insertCell().textContent = formatDateToYYYYMMDD(rowData[2]); // Date (AD)
@@ -1570,37 +1582,33 @@
                 });
             }
 
-            function editPurchaseRecord(rowData) {
-                openPurchaseModal(true).then(() => {
-                    // Unpack row data based on purchaseentry sheet structure
-                    const [sn, billNo, dateAD, dateBS, supplierName, panNumber, nonVat, expenses, fixedAssets, purchase, purchaseType, totalTaxable, vat, total] = rowData;
+            async function editPurchaseRecord(rowData) {
+                await openPurchaseModal(true);
+                const [sn, billNo, dateAD, dateBS, supplierName, panNumber, nonVat, expenses, fixedAssets, purchase, purchaseType, totalTaxable, vat, total] = rowData;
 
-                    // Determine the purchase amount from the correct column
-                    let amount = 0;
-                    switch(purchaseType) {
-                        case 'Non vat': amount = nonVat; break;
-                        case 'Expenses': amount = expenses; break;
-                        case 'Fixed assets': amount = fixedAssets; break;
-                        case 'Purchase': amount = purchase; break;
-                    }
+                let amount = 0;
+                switch (purchaseType) {
+                    case "Non vat": amount = nonVat; break;
+                    case "Expenses": amount = expenses; break;
+                    case "Fixed assets": amount = fixedAssets; break;
+                    case "Purchase": amount = purchase; break;
+                }
 
-                    // Populate form fields
-                    purchaseSnInput.value = sn;
-                    purchaseBillNumberInput.value = billNo;
-                    purchaseDateADInput.value = formatDateToYYYYMMDD(dateAD);
-                    purchaseDateBSInput.value = dateBS;
-                    purchaseTypeSelect.value = purchaseType;
-                    
-                    // Set the supplier in the Choices.js dropdown
-                    if (purchaseChoicesInstance) {
-                        purchaseChoicesInstance.setChoiceByValue(supplierName);
-                    }
-                    supplierPanNumberInput.value = panNumber; // PAN is set automatically by the dropdown's change event
+                purchaseSnInput.value = sn;
+                purchaseBillNumberInput.value = billNo;
+                purchaseDateADInput.value = formatDateToYYYYMMDD(dateAD);
+                purchaseDateBSInput.value = dateBS;
+                purchaseTypeSelect.value = purchaseType;
 
-                    purchaseAmountInput.value = formatNumber(amount);
-                    purchaseVatAmountInput.value = formatNumber(vat);
-                    purchaseTotalInput.value = formatNumber(total);
-                });
+                if (purchaseChoicesInstance) {
+                    purchaseChoicesInstance.setChoiceByValue(String(supplierName || "").trim());
+                }
+
+                supplierPanNumberInput.value = panNumber || ""; 
+
+                purchaseAmountInput.value = formatNumber(amount);
+                purchaseVatAmountInput.value = formatNumber(vat);
+                purchaseTotalInput.value = formatNumber(total);
             }
 
             purchaseForm.addEventListener("submit", function (e) {
@@ -1675,36 +1683,32 @@
                 }
             });
 
-            window.openPurchaseModal = function (isEdit = false) {
-                return new Promise((resolve) => {
-                    document.getElementById("isPurchaseEditMode").value = isEdit;
-                    purchaseModal.style.display = "flex";
+            window.openPurchaseModal = async function(isEdit = false) {
+                document.getElementById("isPurchaseEditMode").value = isEdit;
+                purchaseModal.style.display = "flex";
 
-                    if (!isEdit) {
-                        // Reset form for new entry
-                        purchaseForm.reset();
-                        loadNextPurchaseSN();
-                        purchaseAmountInput.value = '';
-                        purchaseVatAmountInput.value = '';
-                        purchaseTotalInput.value = '';
-                        purchaseTypeSelect.value = '';
-                        supplierPanNumberInput.value = '';
-                    }
-                    
-                    savePurchaseBtn.textContent = isEdit ? '🔄 Update & Save' : '💾 Save';
-                    purchaseAdConversionStatus.style.display = "none";
-                    purchaseBsConversionStatus.style.display = "none";
-                    
-                    loadSuppliers(); // Load suppliers for both new and edit modes
-                    resolve(); // Resolve the promise
-                });
+                if (!isEdit) {
+                    purchaseForm.reset();
+                    loadNextPurchaseSN();
+                    purchaseAmountInput.value = '';
+                    purchaseVatAmountInput.value = '';
+                    purchaseTotalInput.value = '';
+                    purchaseTypeSelect.value = '';
+                    supplierPanNumberInput.value = '';
+                }
+
+                savePurchaseBtn.textContent = isEdit ? "🔄 Update & Save" : "💾 Save";
+                purchaseAdConversionStatus.style.display = "none";
+                purchaseBsConversionStatus.style.display = "none";
+
+                await loadSuppliers();
             };
 
             window.closePurchaseModal = function () {
                 purchaseModal.style.display = "none";
                 purchaseStatusMsg.style.display = "none";
                 purchaseForm.reset();
-                document.getElementById("isPurchaseEditMode").value = 'false'; // Reset edit mode flag
+                document.getElementById("isPurchaseEditMode").value = 'false';
                 if (purchaseChoicesInstance) {
                     purchaseChoicesInstance.destroy();
                 }
@@ -1753,7 +1757,7 @@
                                 purchaseAdConversionStatus.style.display = "none";
                             } else {
                                 purchaseAdConversionStatus.textContent = "Date not found in ADTOBS.";
-                                purchaseAdConversionStatus.classList.add("error");
+                                adConversionStatus.classList.add("error");
                             }
                         })
                         .withFailureHandler(err => {
@@ -1817,7 +1821,8 @@
             vatForm.addEventListener("submit", function(e) {
                 e.preventDefault();
                 saveVatButton.disabled = true;
-                saveVatButton.textContent = "Saving...";
+                const isUpdate = document.getElementById("isVatEditMode").value === 'true';
+                saveVatButton.textContent = isUpdate ? "Updating..." : "Saving...";
                 vatStatusMsg.style.display = "none";
 
                 const data = {
@@ -1829,54 +1834,173 @@
                 if (!data.panNumber || data.panNumber.length !== 9 || isNaN(data.panNumber)) {
                     displayMessageBox("❌ Please enter a valid 9-digit PAN number.", "error");
                     saveVatButton.disabled = false;
-                    saveVatButton.textContent = "💾 Save Data";
+                    saveVatButton.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save Data';
                     return;
                 }
                 if (!data.name) {
                     displayMessageBox("❌ Please enter a Name for the PAN entry.", "error");
                     saveVatButton.disabled = false;
-                    saveVatButton.textContent = "💾 Save Data";
+                    saveVatButton.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save Data';
                     return;
                 }
 
-                google.script.run
-                    .withSuccessHandler(() => {
+                function resetSaveButton() {
+                    saveVatButton.disabled = false;
+                    saveVatButton.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save Data';
+                }
+
+                const successCallback = () => {
+                    if (isUpdate) {
+                        displayMessageBox("✅ Updated successfully", 'info');
+                        setTimeout(() => {
+                            closeVatModal();
+                            loadVatRecords(vatRecordsToShow);
+                        }, 1500);
+                    } else {
                         vatForm.reset();
                         vatNameInput.readOnly = false;
-                        saveVatButton.disabled = false;
-                        saveVatButton.textContent = "💾 Save Data";
                         vatStatusMsg.textContent = "✅ VAT entry saved!";
                         vatStatusMsg.style.display = "block";
                         loadNextVatSN();
                         panCheckStatus.style.display = "none";
-                    })
-                    .withFailureHandler(err => {
-                        displayMessageBox("❌ Couldn't save VAT data: " + err.message, "error");
-                        saveVatButton.disabled = false;
-                        saveVatButton.textContent = "💾 Save Data";
-                    })
-                    .submitVatEntry(data);
+                         if (vatTableContainer.style.display === "block") {
+                            loadVatRecords(vatRecordsToShow); 
+                        }
+                    }
+                    resetSaveButton();
+                };
+
+                const failureCallback = (err) => {
+                    const action = isUpdate ? "update" : "save";
+                    displayMessageBox(`❌ Couldn't ${action} VAT data: ${err.message}`, "error");
+                    resetSaveButton();
+                };
+
+                if (isUpdate) {
+                    google.script.run
+                        .withSuccessHandler(successCallback)
+                        .withFailureHandler(failureCallback)
+                        .updateVatEntry(data);
+                } else {
+                    google.script.run
+                        .withSuccessHandler(successCallback)
+                        .withFailureHandler(failureCallback)
+                        .submitVatEntry(data);
+                }
             });
 
-            window.openVatModal = function () {
+            window.openVatModal = function (isEdit = false) {
+                document.getElementById("isVatEditMode").value = isEdit;
                 vatModal.style.display = "flex";
-                loadNextVatSN();
-                vatPanNumberInput.value = '';
-                vatNameInput.value = '';
-                vatNameInput.readOnly = false;
-                panCheckStatus.style.display = "none";
-                vatStatusMsg.style.display = "none";
+                saveVatButton.textContent = isEdit ? '🔄 Update & Save' : '💾 Save Data';
+
+                if (!isEdit) {
+                    vatForm.reset();
+                    loadNextVatSN();
+                    vatNameInput.readOnly = false;
+                    panCheckStatus.style.display = "none";
+                    vatStatusMsg.style.display = "none";
+                }
             };
 
             window.closeVatModal = function () {
                 vatModal.style.display = "none";
                 vatForm.reset();
+                document.getElementById("isVatEditMode").value = 'false';
                 vatNameInput.readOnly = false;
                 panCheckStatus.style.display = "none";
                 vatStatusMsg.style.display = "none";
-                const msgBox = document.getElementById("messageBox");
-                if (msgBox) msgBox.remove();
             };
+
+            // START OF CHANGE: VAT Table Logic
+            window.toggleViewVatTable = function() {
+                const viewVatShortcut = document.getElementById("viewVatShortcut");
+                const isVisible = vatTableContainer.style.display === "block";
+
+                if (!isVisible) {
+                    vatRecordsToShow = 10;
+                    vatTableContainer.style.display = "block";
+                    viewVatShortcut.querySelector("span").textContent = "Hide VAT";
+                    loadVatRecords(vatRecordsToShow);
+                } else {
+                    vatTableContainer.style.display = "none";
+                    viewMoreVatContainer.style.display = "none";
+                    viewVatShortcut.querySelector("span").textContent = "View VAT";
+                    vatTableBody.innerHTML = '';
+                }
+            }
+
+            function loadVatRecords(count) {
+                if (count <= 10) {
+                    vatTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Loading recent VAT records...</td></tr>`;
+                }
+                viewMoreVatBtn.textContent = "Loading...";
+                viewMoreVatBtn.disabled = true;
+
+                google.script.run
+                    .withSuccessHandler(function(records) {
+                        if (count <= 10) vatTableBody.innerHTML = '';
+
+                        if (!records || records.length === 0) {
+                            vatTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No recent VAT records found.</td></tr>`;
+                            viewMoreVatContainer.style.display = "none";
+                            return;
+                        }
+
+                        records.forEach(rowData => {
+                            const row = vatTableBody.insertRow();
+                            row.insertCell().textContent = rowData[0]; // SN
+                            row.insertCell().textContent = rowData[1]; // PAN Number
+                            row.insertCell().textContent = rowData[2]; // Name
+
+                            const actionCell = row.insertCell();
+                            actionCell.style.textAlign = 'center';
+                            actionCell.innerHTML = `<button class="edit-button"><i data-lucide="edit-2"></i>Edit</button>`;
+                            const editButton = actionCell.querySelector('.edit-button');
+                            lucide.createIcons({ nodes: [editButton.querySelector('svg')] });
+
+                            editButton.addEventListener('click', () => {
+                                confirmEditVatRecord(rowData);
+                            });
+                        });
+
+                        viewMoreVatContainer.style.display = "block";
+                        viewMoreVatBtn.textContent = "View More Results";
+                        viewMoreVatBtn.disabled = false;
+                        viewMoreVatBtn.style.display = (records.length < count) ? 'none' : 'inline-block';
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error("Error loading VAT records:", error);
+                        vatTableBody.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Error loading records: ${error.message}</td></tr>`;
+                        viewMoreVatBtn.textContent = "View More Results";
+                        viewMoreVatBtn.disabled = false;
+                    })
+                    .getRecentVatRecords(count);
+            }
+
+            viewMoreVatBtn.addEventListener('click', function() {
+                vatRecordsToShow += 5;
+                loadVatRecords(vatRecordsToShow);
+            });
+
+            function confirmEditVatRecord(rowData) {
+                const pan = rowData[1];
+                const message = `Do you want to edit the entry for PAN ${pan}?`;
+
+                displayConfirmBox(message, () => {
+                    editVatRecord(rowData);
+                });
+            }
+
+            function editVatRecord(rowData) {
+                const [sn, panNumber, name] = rowData;
+                openVatModal(true);
+                vatSnInput.value = sn;
+                vatPanNumberInput.value = panNumber;
+                vatNameInput.value = name;
+            }
+            // END OF CHANGE
+
 
             // Global click handler for modals and message box
             window.onclick = function (event) {
@@ -1889,7 +2013,6 @@
                 }
             };
 
-            // Custom Message Box function (replaces alert())
             function displayMessageBox(message, type = "info") {
                 let messageBox = document.getElementById("messageBox");
                 if (messageBox) messageBox.remove();
@@ -1923,14 +2046,13 @@
                 document.body.appendChild(messageBox);
             }
 
-            // New confirmation box function
             function displayConfirmBox(message, onConfirm, onCancel) {
                 let messageBox = document.getElementById("messageBox");
-                if (messageBox) messageBox.remove(); // Remove any existing message box
+                if (messageBox) messageBox.remove(); 
 
                 messageBox = document.createElement("div");
                 messageBox.id = "messageBox";
-                messageBox.classList.add("message-box-confirm"); // Add a class for specific styling
+                messageBox.classList.add("message-box-confirm"); 
                 messageBox.style.cssText = `
                     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
                     background-color: rgba(0,0,0,0.4); z-index: 1001;
@@ -1961,7 +2083,7 @@
                 document.body.appendChild(messageBox);
             }
 
-        }); // End DOMContentLoaded
+        });
     </script>
 </body>
 </html>

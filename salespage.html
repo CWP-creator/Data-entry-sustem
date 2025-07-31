@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Sales Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --blue: #1e3a8a;
+            --blue-dark: #1e40af;
+            --gray-bg: #f8fafc; /* slate-50 */
+            --gray-border: #e2e8f0; /* slate-200 */
+            --gray-light-text: #64748b; /* slate-500 */
+            --text-gray: #475569; /* slate-600 */
+            --text-dark: #1e293b; /* slate-800 */
+            --white: #ffffff;
+            --green: #10b981;
+            --light-green: #d1fae5;
+            --dark-green: #065f46;
+            --chart-primary-blue: #2563eb; /* blue-600 */
+            --chart-light-blue: rgba(37, 99, 235, 0.2);
+            --chart-line-dark-blue: #1a56e0;
+            --grid-line-color: #f1f5f9;
+            --axis-tick-color: #64748b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-bg);
+            color: var(--text-gray);
+            margin: 0;
+        }
+
+        .header {
+            background: var(--blue);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 500;
+        }
+
+        .header .brand {
+            font-weight: 600;
+            font-size: 20px;
+        }
+
+.sidebar {
+    background: #1e3a8a; /* --blue variable */
+    width: 200px;
+    padding: 20px 12px;
+    color: white;
+    position: fixed;
+    top: 66px;
+    bottom: 0;
+    left: 0;
+    overflow-y: auto;
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar a.active {
+    background: #1e40af; /* --blue-dark variable */
+    font-weight: 600;
+}
+
+.sidebar a svg {
+    margin-right: 7px;
+    stroke-width: 1.5;
+}
+
+.sidebar a:hover {
+    background: #334155;
+}
+
+        .main {
+            margin-left: 230px;
+            padding: 30px;
+            padding-top: 90px;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .page-header .title-group h1 {
+            font-size: 28px;
+            color: var(--text-dark);
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .page-header .title-group p {
+            margin: 4px 0 0;
+            font-size: 16px;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background-color: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .summary-card .icon-container {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .summary-card .icon-container.sales-amount { background-color: #e0e7ff; color: #4338ca; }
+        .summary-card .icon-container.vat-amount { background-color: #d1fae5; color: #047857; }
+        .summary-card .icon-container.total-amount { background-color: #f3e8ff; color: #7e22ce; }
+
+        .summary-card .icon-container svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .summary-card .info h3 {
+            margin: 0 0 5px;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-gray);
+        }
+
+        .summary-card .info .value {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        
+        .chart-container {
+            background-color: var(--white);
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-border);
+            margin-bottom: 32px;
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .chart-header .title h2 {
+            font-size: 20px;
+            color: var(--text-dark);
+            margin: 0 0 4px 0;
+            font-weight: 600;
+        }
+        .chart-header .title p {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin: 0;
+        }
+        .chart-toggle button {
+            padding: 9px 12px;
+            height: 36px;
+            border: 1px solid #cbd5e1;
+            background-color: var(--white);
+            color: var(--text-gray);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+        }
+        .chart-toggle button.active {
+            background-color: var(--chart-primary-blue);
+            color: var(--white);
+            border-color: var(--chart-primary-blue);
+        }
+        .chart-area {
+            position: relative;
+            height: 320px; 
+            width: 100%;
+        }
+
+        .sales-records-container {
+            background-color: var(--white);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-border);
+        }
+
+        .records-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .records-header .title h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+        }
+
+        .records-header .title p {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-top: 4px;
+        }
+
+        .records-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-light-text);
+        }
+
+        .search-input {
+            padding: 10px 12px 10px 40px;
+            border: 1px solid var(--gray-border);
+            border-radius: 8px;
+            font-size: 14px;
+            width: 250px;
+        }
+
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: 1px solid var(--gray-border);
+            background-color: var(--white);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .export-btn:hover {
+            background-color: var(--gray-bg);
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: var(--gray-bg);
+            border-radius: 8px;
+        }
+
+        .filter-bar label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-gray);
+        }
+
+        .filter-bar select {
+            padding: 8px 12px;
+            border: 1px solid var(--gray-border);
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 180px;
+        }
+
+        .table-wrapper {
+            overflow-y: auto;
+            max-height: 350px; /* Controls the height of the scrollable area */
+            position: relative;
+        }
+
+        .sales-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .sales-table thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 500;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            background-color: var(--gray-bg);
+            z-index: 1;
+        }
+
+        .sales-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-border);
+            color: var(--text-dark);
+            vertical-align: middle;
+        }
+        
+        .sales-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .sales-table tfoot {
+            position: sticky;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .sales-table tfoot tr {
+            background-color: var(--gray-bg);
+            font-weight: bold;
+        }
+        
+        .sales-table tfoot td {
+            border-bottom: none;
+            color: var(--text-dark);
+            padding: 16px;
+        }
+
+        .sales-table .total-amount {
+            font-weight: 600;
+        }
+
+        .sales-table .actions a {
+            color: var(--chart-primary-blue);
+            display: inline-flex;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .sales-table .actions a:hover {
+            background-color: #dbeafe; /* blue-100 */
+        }
+
+        .records-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            font-size: 14px;
+            color: var(--text-gray);
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pagination a, .pagination span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-gray);
+            min-width: 36px;
+            height: 36px;
+            padding: 0 8px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        
+        .pagination a:hover {
+            background-color: var(--gray-bg);
+            color: var(--text-dark);
+        }
+
+        .pagination a.active {
+            background-color: var(--chart-primary-blue);
+            color: var(--white);
+            border-color: var(--chart-primary-blue);
+        }
+
+        .pagination a.disabled {
+            color: var(--gray-light-text);
+            pointer-events: none;
+            cursor: default;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: 20px; padding-top: 90px; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .records-header, .records-footer { flex-direction: column; align-items: stretch; }
+            .records-actions { justify-content: space-between; }
+            .search-input { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand">📘 Sales Dashboard</div>
+    </div>
+
+    <div class="sidebar">
+    <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev"   target="self"><i data-lucide="layout-dashboard"></i>Dashboard</a>
+    <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=sales"class="active" target="self"></i>Sales</a>
+        <a href="#"><i data-lucide="package"></i>Purchase</a>
+        <a href="#"><i data-lucide="file-text"></i>VAT</a>
+        <a href="#"><i data-lucide="book-open"></i>Ledger</a>
+        <a href="#"><i data-lucide="calendar"></i>Reports</a>
+        <a href="#"><i data-lucide="bar-chart-2"></i>Analytics</a>
+    </div>
+
+    <div class="main">
+        <div class="page-header">
+            <div class="title-group">
+                <h1>Sales Overview</h1>
+                <p>An overview of your business performance</p>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+             <div class="summary-card">
+                <div class="icon-container sales-amount">
+                    <i data-lucide="dollar-sign"></i>
+                </div>
+                <div class="info">
+                    <h3>Total Sales</h3>
+                    <p class="value" id="sales-amount-value">Loading...</p>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="icon-container vat-amount">
+                    <i data-lucide="receipt"></i>
+                </div>
+                <div class="info">
+                    <h3>Total VAT</h3>
+                    <p class="value" id="vat-amount-value">Loading...</p>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="icon-container total-amount">
+                    <i data-lucide="scale"></i>
+                </div>
+                <div class="info">
+                    <h3>Grand Total</h3>
+                    <p class="value" id="total-amount-value">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+             <div class="chart-header">
+                <div class="title">
+                    <h2>Monthly Sales Performance</h2>
+                    <p>Track your sales trends over time</p>
+                </div>
+                <div class="chart-toggle">
+                    <button id="barChartBtn" class="active">Bar</button>
+                    <button id="lineChartBtn">Line</button>
+                </div>
+            </div>
+            <div class="chart-area" id="salesChart">
+                <canvas id="mySalesChart"></canvas>
+            </div>
+        </div>
+
+        <div class="sales-records-container">
+            <div class="records-header">
+                <div class="title">
+                    <h2>View Recent Sales</h2>
+                    <p>Browse through your detailed transaction history</p>
+                </div>
+                <div class="records-actions">
+                    <div class="search-wrapper">
+                        <i data-lucide="search" size="18"></i>
+                        <input type="text" class="search-input" placeholder="Search records...">
+                    </div>
+                    <button class="export-btn">
+                        <i data-lucide="download" size="16"></i>
+                        Export CSV
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <label>Filter by:</label>
+                <select id="clientFilterSelect">
+                    <option>All Clients</option>
+                </select>
+                <select id="monthFilterSelect">
+                    <option value="All">All Months</option>
+                    <option value="1">Baisakh</option>
+                    <option value="2">Jestha</option>
+                    <option value="3">Ashadh</option>
+                    <option value="4">Shrawan</option>
+                    <option value="5">Bhadra</option>
+                    <option value="6">Ashwin</option>
+                    <option value="7">Kartik</option>
+                    <option value="8">Mangsir</option>
+                    <option value="9">Poush</option>
+                    <option value="10">Magh</option>
+                    <option value="11">Falgun</option>
+                    <option value="12">Chaitra</option>
+                </select>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="sales-table">
+                    <thead>
+                        <tr>
+                            <th>Date (BS)</th>
+                            <th>Bill No.</th>
+                            <th>Client Name</th>
+                            <th>PAN No.</th>
+                            <th>Sales Amount</th>
+                            <th>VAT</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="salesDataBody">
+                       <tr><td colspan="8" style="text-align: center; padding: 20px;">Loading recent sales...</td></tr>
+                    </tbody>
+                    <tfoot id="salesTableFooter">
+                        </tfoot>
+                </table>
+            </div>
+
+            <div class="records-footer">
+                <span id="results-info-span">Showing results...</span>
+                <!-- Pagination removed -->
+            </div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+
+        // --- Global variables ---
+        let salesChart;
+        let chartData = [];
+        let currentChartType = 'bar';
+        const pageSize = 5; // Records to show per page
+        let currentPage = 1;
+        let isLoadingMore = false;
+        let hasMoreData = true;
+
+        // --- DOM Elements ---
+        const barChartBtn = document.getElementById('barChartBtn');
+        const lineChartBtn = document.getElementById('lineChartBtn');
+        const canvas = document.getElementById('mySalesChart');
+        const clientFilterSelect = document.getElementById('clientFilterSelect');
+        const monthFilterSelect = document.getElementById('monthFilterSelect');
+        const tableWrapper = document.querySelector('.table-wrapper');
+        const tableBody = document.getElementById('salesDataBody');
+        const tableFooter = document.getElementById('salesTableFooter');
+        const resultsInfoSpan = document.getElementById('results-info-span');
+
+        // --- Helper functions ---
+        const formatToRupees = (num) => `Rs. ${Number(num || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        const formatToK = (num) => `Rs. ${Math.round(num / 1000)}k`; 
+
+        // --- Main function to load all dashboard data ---
+        function loadDashboardData() {
+            google.script.run.withSuccessHandler(updateSummaryCards).getTotalSalesSummary();
+            google.script.run.withSuccessHandler(populateClientFilter).getSalesbookClientList();
+            
+            google.script.run.withSuccessHandler(data => {
+                chartData = data;
+                renderChart();
+            }).withFailureHandler(handleError("Chart Data")).getSalesDataForChart();
+            
+            // Initial data load for the table on page 1
+            loadTableData(1);
+        }
+
+        // --- Function to fetch and display sales data ---
+        function loadTableData(page) {
+            if (isLoadingMore) return;
+            isLoadingMore = true;
+
+            const filters = {
+                clientName: clientFilterSelect.value,
+                nepaliMonth: monthFilterSelect.value
+            };
+
+            if (page === 1) {
+                setLoadingState(true);
+            }
+
+            google.script.run
+                .withSuccessHandler(response => {
+                    if (page === 1) {
+                       tableBody.innerHTML = '';
+                    }
+                    appendSalesTable(response.records);
+                    updateTableFooter(response.totals, response.pagination.totalRecords);
+                    
+                    currentPage = response.pagination.currentPage;
+                    hasMoreData = currentPage < response.pagination.totalPages;
+                    isLoadingMore = false;
+                    
+                    updateResultsInfo(response.pagination.totalRecords);
+                    if (page === 1) setLoadingState(false);
+                })
+                .withFailureHandler(handleError("Sales Records"))
+                .getSalesRecords(filters, page, pageSize);
+        }
+
+        // --- Update summary cards ---
+        function updateSummaryCards(summary) {
+            document.getElementById('sales-amount-value').textContent = formatToRupees(summary.totalSales);
+            document.getElementById('vat-amount-value').textContent = formatToRupees(summary.totalVat);
+            document.getElementById('total-amount-value').textContent = formatToRupees(summary.grandTotal);
+        }
+        
+        // --- Populate the client filter dropdown ---
+        function populateClientFilter(clientNames) {
+            if (!clientNames || clientNames.length === 0) return;
+            clientNames.forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                clientFilterSelect.appendChild(option);
+            });
+        }
+        
+        // --- Append rows to sales table ---
+        function appendSalesTable(records) {
+            if (!records || records.length === 0) {
+                if (currentPage === 1) { // Only show if it's the first page and it's empty
+                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No sales records found for the selected filters.</td></tr>';
+                }
+            } else {
+                records.forEach(sale => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${sale[3] || ''}</td>
+                        <td>${sale[1]}</td>
+                        <td>${sale[4]}</td>
+                        <td>${sale[5]}</td>
+                        <td>${formatToRupees(sale[6])}</td>
+                        <td>${formatToRupees(sale[7])}</td>
+                        <td class="total-amount">${formatToRupees(sale[8])}</td>
+                        <td class="actions">
+                            <a href="#" onclick="editRecord(${sale[0]})" title="Edit"><i data-lucide="pencil" size="16"></i></a>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        // --- Update the table footer ---
+        function updateTableFooter(totals, totalRecords) {
+            tableFooter.innerHTML = '';
+            if (totals) {
+                const totalRow = document.createElement('tr');
+                totalRow.innerHTML = `
+                    <td colspan="4"><strong>Grand Total (${totalRecords} records)</strong></td>
+                    <td><strong>${formatToRupees(totals.totalSales)}</strong></td>
+                    <td><strong>${formatToRupees(totals.totalVat)}</strong></td>
+                    <td class="total-amount"><strong>${formatToRupees(totals.grandTotal)}</strong></td>
+                    <td></td>
+                `;
+                tableFooter.appendChild(totalRow);
+            }
+        }
+
+        // --- Update the results info span ---
+        function updateResultsInfo(totalRecords) {
+            const recordsShown = tableBody.querySelectorAll('tr').length;
+             if (totalRecords === 0) {
+                resultsInfoSpan.textContent = 'Showing 0 results';
+                return;
+            }
+            resultsInfoSpan.textContent = `Showing ${recordsShown} of ${totalRecords} results`;
+        }
+        
+        // --- Render the chart ---
+        function renderChart() {
+            if (!chartData || chartData.length === 0 || !canvas) {
+                const chartArea = document.getElementById('salesChart');
+                if (chartArea) {
+                    chartArea.innerHTML = '<p style="text-align:center; color: var(--text-gray); padding-top: 50px;">No data available to display the chart.</p>';
+                }
+                return;
+            }
+
+            if (salesChart) salesChart.destroy();
+
+            const labels = chartData.map(d => d.month);
+            const dataValues = chartData.map(d => d.sales);
+            const ctx = canvas.getContext('2d');
+
+            salesChart = new Chart(ctx, {
+                type: currentChartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Sales',
+                        data: dataValues,
+                        backgroundColor: currentChartType === 'bar' ? '#1e3a8a' : 'rgba(37, 99, 235, 0.15)',
+                        borderColor: '#1e3a8a',
+                        borderWidth: currentChartType === 'line' ? 3 : 1,
+                        borderRadius: 6,
+                        fill: currentChartType === 'line',
+                        tension: 0.4,
+                        pointRadius: currentChartType === 'line' ? 5 : 0,
+                        pointBackgroundColor: '#1e3a8a',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { drawBorder: false, display: false }, ticks: { color: 'var(--axis-tick-color)', font: { family: 'Inter' }, callback: value => formatToK(value) }},
+                        x: { grid: { display: false }, ticks: { color: 'var(--axis-tick-color)', font: { family: 'Inter' }}}
+                    }
+                }
+            });
+        }
+
+        // --- Utility Functions ---
+        function setLoadingState(isLoading) {
+            if (isLoading) {
+                resultsInfoSpan.textContent = 'Fetching data...';
+                tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Loading sales data...</td></tr>';
+            }
+        }
+
+        function handleError(source) {
+            return (error) => {
+                console.error(`${source} Error:`, error);
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #ef4444; padding: 20px;">Error loading ${source.toLowerCase()}. Please try again.</td></tr>`;
+                isLoadingMore = false;
+            };
+        }
+
+        // --- Event Listeners ---
+        barChartBtn.addEventListener('click', () => {
+            if (currentChartType === 'bar') return;
+            currentChartType = 'bar';
+            barChartBtn.classList.add('active');
+            lineChartBtn.classList.remove('active');
+            renderChart();
+        });
+        
+        lineChartBtn.addEventListener('click', () => {
+            if (currentChartType === 'line') return;
+            currentChartType = 'line';
+            lineChartBtn.classList.add('active');
+            barChartBtn.classList.remove('active');
+            renderChart();
+        });
+
+        function resetAndLoad() {
+            currentPage = 1;
+            hasMoreData = true;
+            tableBody.innerHTML = '';
+            loadTableData(1);
+        }
+
+        clientFilterSelect.addEventListener('change', resetAndLoad);
+        monthFilterSelect.addEventListener('change', resetAndLoad);
+
+        tableWrapper.addEventListener('scroll', () => {
+            if (isLoadingMore || !hasMoreData) return;
+
+            const buffer = 10; // Small buffer to trigger before reaching the absolute bottom
+            if (tableWrapper.scrollTop + tableWrapper.clientHeight >= tableWrapper.scrollHeight - buffer) {
+                loadTableData(currentPage + 1);
+            }
+        });
+
+        window.editRecord = function(sn) {
+            console.log("Editing record with SN:", sn);
+            alert("Edit functionality for SN " + sn + " is not yet implemented.");
+        }
+
+        // --- Initial Data Load ---
+        loadDashboardData();
+    });
+</script>
+</body>
+</html>

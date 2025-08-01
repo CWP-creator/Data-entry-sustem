@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Great+Vibes&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-`   <base target="_self">
+    <base target="_self">
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
@@ -673,13 +673,12 @@
         </div>
 
         <div class="grid-nameds">
-            <div class="named"><h3>Monthly’s Sales</h3><p>Rs. 12,500</p></div>
-            <div class="named"><h3>Monthly’s Purchases</h3><p>Rs. 8,200</p></div>
-            <div class="named"><h3>Net Cash</h3><p>Rs. 4,300</p></div>
-            <div class="named"><h3>Pending Invoices</h3><p>3</p></div>
+            <div class="named"><h3>Monthly’s Sales</h3><p id="monthlySalesValue">Loading...</p></div>
+            <div class="named"><h3>Monthly’s Purchases</h3><p id="monthlyPurchasesValue">Loading...</p></div>
+            <div class="named"><h3>Net Cash</h3><p id="netCashValue">Loading...</p></div>
         </div>
 
-        <div class="shortcuts">
+       <div class="shortcuts">
             <h2>Quick Actions</h2>
             <div class="shortcut-grid">
                 <div class="shortcut" onclick="openSalesModal()">
@@ -688,7 +687,7 @@
                 <div class="shortcut" onclick="openPurchaseModal()">
                     <i data-lucide="shopping-bag"></i><span>New Purchase</span>
                 </div>
-                <div class="shortcut" onclick="openVatModal()">
+                <div class="shortcut" onclick="openNewVatModal()">
                     <i data-lucide="file-text"></i><span>New VAT</span>
                 </div>
                 <div class="shortcut" id="viewSalesShortcut" onclick="toggleViewSalesTable()">
@@ -697,10 +696,7 @@
                 <div class="shortcut" id="viewPurchasesShortcut" onclick="toggleViewPurchaseTable()">
                     <i data-lucide="archive"></i><span>View Purchases</span>
                 </div>
-                <div class="shortcut" id="viewVatShortcut" onclick="toggleViewVatTable()">
-                    <i data-lucide="layers"></i><span>View VAT</span>
-                </div>
-                </div>
+            </div>
         </div>
 
         <div class="sales-table-container" id="salesTableContainer" style="display: none;">
@@ -711,18 +707,17 @@
                         <tr>
                             <th>SN</th>
                             <th>Bill No</th>
-                            <th>Date (AD)</th>
                             <th>Date (BS)</th>
                             <th>Name</th>
                             <th>PAN No</th>
                             <th>Sales Amount</th>
-                            <th>VAT Amount</th>
+                            <th>VAT</th>
                             <th>Total</th>
-                            <th>Edit</th> 
+                            <th>Edit</th>
                         </tr>
                     </thead>
                     <tbody id="salesTableBody">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
             <div class="modal-footer" id="viewMoreContainer" style="display: none; margin-top: 15px;">
@@ -757,26 +752,6 @@
             </div>
         </div>
 
-        <div class="sales-table-container" id="vatTableContainer" style="display: none;">
-            <h2>Recent VAT Entries</h2>
-            <div class="table-responsive">
-                <table class="sales-table">
-                    <thead>
-                        <tr>
-                            <th>SN</th>
-                            <th>PAN Number</th>
-                            <th>Name</th>
-                            <th>Edit</th>
-                        </tr>
-                    </thead>
-                    <tbody id="vatTableBody">
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer" id="viewMoreVatContainer" style="display: none; margin-top: 15px;">
-                <button id="viewMoreVatBtn" class="view-more-btn">View More Results</button>
-            </div>
-        </div>
         <div class="modal" id="salesModal">
             <div class="modal-content">
                 <span class="close-btn" onclick="closeSalesModal()">&times;</span>
@@ -785,7 +760,7 @@
                     <input type="hidden" id="isEditMode" value="false" />
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="sn">SN</label><input type="text" id="sn" name="sn" value="170" readonly />
+                            <label for="sn">SN</label><input type="text" id="sn" name="sn" readonly />
                         </div>
                         <div class="form-group">
                             <label for="billNumber">Bill No</label>
@@ -840,7 +815,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="purchaseSn">SN</label>
-                            <input type="text" id="purchaseSn" name="purchaseSn" value="170" readonly />
+                            <input type="text" id="purchaseSn" name="purchaseSn" readonly />
                         </div>
                         <div class="form-group">
                             <label for="purchaseBillNumber">Bill No</label>
@@ -903,47 +878,6 @@
                 </form>
             </div>
         </div>
-
-        <div class="modal" id="vatModal">
-            <div class="modal-content">
-                <span class="close-btn" onclick="closeVatModal()">&times;</span>
-                <h2 class="modal-title"><i data-lucide="file-text"></i> VAT No Entry Form</h2>
-                <form id="vatForm">
-                    <input type="hidden" id="isVatEditMode" value="false" />
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="vatSn">Serial Number:</label>
-                            <input type="text" id="vatSn" name="vatSn" readonly />
-                        </div>
-                        <div class="form-group">
-                            <label for="vatPanNumber">9-digit PAN Number:</label>
-                            <input
-                                type="text"
-                                id="vatPanNumber"
-                                name="vatPanNumber"
-                                placeholder="Enter 9-digit PAN"
-                                maxlength="9"
-                                required
-                            />
-                            <span id="panCheckStatus" class="conversion-status"></span>
-                        </div>
-                        <div class="form-group full">
-                            <label for="vatName">Name:</label>
-                            <input
-                                type="text"
-                                id="vatName"
-                                name="vatName"
-                                placeholder="Auto or manual input"
-                                required
-                            />
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" id="saveVatButton">💾 Save Data</button>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
@@ -958,7 +892,6 @@
             let supplierMap = {};
             let purchaseChoicesInstance;
             
-
             // --- Sales Modal Elements ---
             const salesModal = document.getElementById("salesModal");
             const amountInput = document.getElementById("amount");
@@ -1012,34 +945,11 @@
             purchaseStatusMsg.style.display = "none";
             purchaseForm.querySelector(".modal-footer").appendChild(purchaseStatusMsg);
 
-            // --- VAT Modal Elements ---
-            const vatModal = document.getElementById("vatModal");
-            const vatSnInput = document.getElementById("vatSn");
-            const vatPanNumberInput = document.getElementById("vatPanNumber");
-            const vatNameInput = document.getElementById("vatName");
-            const vatForm = document.getElementById("vatForm");
-            const saveVatButton = document.getElementById("saveVatButton");
-            const panCheckStatus = document.getElementById("panCheckStatus");
-            const vatStatusMsg = document.createElement("div");
-            vatStatusMsg.style.marginTop = "10px";
-            vatStatusMsg.style.color = "#16a34a";
-            vatStatusMsg.style.fontWeight = "600";
-            vatStatusMsg.style.display = "none";
-            vatForm.querySelector(".modal-footer").appendChild(vatStatusMsg);
-            
-            // START OF CHANGE: VAT Table and "View More" Elements
-            const vatTableContainer = document.getElementById("vatTableContainer");
-            const vatTableBody = document.getElementById("vatTableBody");
-            const viewMoreVatContainer = document.getElementById("viewMoreVatContainer");
-            const viewMoreVatBtn = document.getElementById("viewMoreVatBtn");
-            let vatRecordsToShow = 10;
-            // END OF CHANGE
-
 
             // Helper function to format numbers with commas
             function formatNumber(num) {
                 if (isNaN(num) || num === null || num === undefined) {
-                    return "";
+                    return "0.00";
                 }
                 return Number(num).toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: 2});
             }
@@ -1049,6 +959,27 @@
                 if (!isoDateString) return '';
                 const datePart = String(isoDateString).split('T')[0];
                 return datePart;
+            }
+            
+            // --- Dashboard Summary Logic ---
+            function loadDashboardSummary() {
+                google.script.run
+                    .withSuccessHandler(function(summary) {
+                        const sales = summary.monthlySales || 0;
+                        const purchases = summary.monthlyPurchases || 0;
+                        const netCash = sales - purchases;
+
+                        document.getElementById('monthlySalesValue').textContent = 'Rs. ' + formatNumber(sales);
+                        document.getElementById('monthlyPurchasesValue').textContent = 'Rs. ' + formatNumber(purchases);
+                        document.getElementById('netCashValue').textContent = 'Rs. ' + formatNumber(netCash);
+                    })
+                    .withFailureHandler(function(error) {
+                        console.error("Error loading dashboard summary:", error);
+                        document.getElementById('monthlySalesValue').textContent = 'Error';
+                        document.getElementById('monthlyPurchasesValue').textContent = 'Error';
+                        document.getElementById('netCashValue').textContent = 'Error';
+                    })
+                    .getDashboardSummary();
             }
 
             // --- Sales Table Logic ---
@@ -1073,42 +1004,36 @@
 
             function loadSalesRecords(count) {
                 if (count <= 10) {
-                    salesTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">Loading recent sales records...</td></tr>`;
+                    salesTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">Loading recent sales records...</td></tr>`;
                 }
                 viewMoreBtn.textContent = "Loading...";
 
                 google.script.run
                     .withSuccessHandler(function(records) {
-                        if (count <= 10) salesTableBody.innerHTML = ''; 
+                        if (count <= 10) salesTableBody.innerHTML = '';
 
                         if (!records || records.length === 0) {
-                            salesTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No recent sales records found.</td></tr>`;
-                            viewMoreContainer.style.display = "none"; 
+                            salesTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No recent sales records found.</td></tr>`;
+                            viewMoreContainer.style.display = "none";
                             return;
                         }
-                        
-                        // To prevent duplicating rows on "View More", clear the table body only for the initial load.
-                        if (count <= 10) {
-                           salesTableBody.innerHTML = '';
-                        } else {
-                           // For subsequent loads, we append, so we find where to start.
-                           const existingRows = salesTableBody.rows.length;
-                           records = records.slice(existingRows);
-                        }
 
+                        if (count > 10) {
+                        const existingRows = salesTableBody.rows.length;
+                        records = records.slice(existingRows);
+                        }
 
                         records.forEach(rowData => {
                             const row = salesTableBody.insertRow();
                             row.insertCell().textContent = rowData[0]; // SN
                             row.insertCell().textContent = rowData[1]; // Bill No
-                            row.insertCell().textContent = formatDateToYYYYMMDD(rowData[2]); // Date (AD)
                             row.insertCell().textContent = rowData[3]; // Date (BS)
                             row.insertCell().textContent = rowData[4]; // Name
                             row.insertCell().textContent = rowData[5]; // PAN No
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[6]); // Sales Amount 
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[7]); // VAT 
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[8]); // Total 
-                            
+                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[6]); // Sales Amount
+                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[7]); // VAT
+                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[8]); // Total
+
                             const actionCell = row.insertCell();
                             actionCell.style.textAlign = 'center';
                             actionCell.innerHTML = `<button class="edit-button"><i data-lucide="edit-2"></i>Edit</button>`;
@@ -1119,7 +1044,7 @@
                                 confirmEditSalesRecord(rowData);
                             });
                         });
-                        
+
                         viewMoreContainer.style.display = "block";
                         viewMoreBtn.textContent = "View More Results";
                         viewMoreBtn.style.display = (records.length < 5 && count > 10) ? 'none' : 'inline-block';
@@ -1239,6 +1164,7 @@
                         setTimeout(() => {
                             closeSalesModal();
                             loadSalesRecords(recordsToShow); 
+                            loadDashboardSummary();
                         }, 1500);
                     } else {
                         salesForm.reset();
@@ -1255,6 +1181,7 @@
                         if (salesTableContainer.style.display === "block") {
                             loadSalesRecords(recordsToShow);
                         }
+                        loadDashboardSummary();
                     }
                     resetSaveButton();
                 };
@@ -1283,6 +1210,7 @@
                 salesModal.style.display = "flex";
 
                 if (!isEdit) {
+                    salesForm.reset();
                     loadNextSalesSN();
                     dateADInput.value = '';
                     dateBSInput.value = '';
@@ -1644,6 +1572,7 @@
                         setTimeout(() => {
                             closePurchaseModal();
                             loadPurchaseRecords(purchaseRecordsToShow);
+                            loadDashboardSummary();
                         }, 1500);
                     } else {
                         purchaseForm.reset();
@@ -1661,6 +1590,7 @@
                         if (document.getElementById("purchaseTableContainer").style.display === "block") {
                             loadPurchaseRecords(purchaseRecordsToShow);
                         }
+                        loadDashboardSummary();
                     }
                     resetSaveButton();
                 };
@@ -1778,237 +1708,15 @@
                 }
             });
 
-            // --- VAT Entry Form Logic ---
-            function loadNextVatSN() {
-                google.script.run.withSuccessHandler(sn => {
-                    vatSnInput.value = sn;
-                }).getNextVatSN();
+            function openNewVatModal() {
+                alert("The 'New VAT Entry' feature has not been fully implemented yet.");
             }
-
-            vatPanNumberInput.addEventListener("input", function() {
-                const pan = this.value.trim();
-                if (pan.length === 9 && !isNaN(pan)) {
-                    panCheckStatus.style.display = "block";
-                    panCheckStatus.textContent = "Checking PAN...";
-                    panCheckStatus.classList.remove("error");
-                    google.script.run
-                        .withSuccessHandler(name => {
-                            if (name) {
-                                vatNameInput.value = name;
-                                vatNameInput.readOnly = true;
-                                panCheckStatus.style.display = "none";
-                            } else {
-                                vatNameInput.value = "";
-                                vatNameInput.readOnly = false;
-                                panCheckStatus.textContent = "PAN not found. Enter name manually.";
-                                panCheckStatus.classList.remove("error");
-                            }
-                        })
-                        .withFailureHandler(err => {
-                            console.error("Error checking PAN:", err);
-                            vatNameInput.value = "";
-                            vatNameInput.readOnly = false;
-                            panCheckStatus.textContent = "Error checking PAN: " + err.message;
-                            panCheckStatus.classList.add("error");
-                        })
-                        .getClientNameByPan(pan);
-                } else {
-                    vatNameInput.value = "";
-                    vatNameInput.readOnly = false;
-                    panCheckStatus.style.display = "none";
-                }
-            });
-
-            vatForm.addEventListener("submit", function(e) {
-                e.preventDefault();
-                saveVatButton.disabled = true;
-                const isUpdate = document.getElementById("isVatEditMode").value === 'true';
-                saveVatButton.textContent = isUpdate ? "Updating..." : "Saving...";
-                vatStatusMsg.style.display = "none";
-
-                const data = {
-                    sn: vatSnInput.value,
-                    panNumber: vatPanNumberInput.value,
-                    name: vatNameInput.value
-                };
-
-                if (!data.panNumber || data.panNumber.length !== 9 || isNaN(data.panNumber)) {
-                    displayMessageBox("❌ Please enter a valid 9-digit PAN number.", "error");
-                    saveVatButton.disabled = false;
-                    saveVatButton.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save Data';
-                    return;
-                }
-                if (!data.name) {
-                    displayMessageBox("❌ Please enter a Name for the PAN entry.", "error");
-                    saveVatButton.disabled = false;
-                    saveVatButton.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save Data';
-                    return;
-                }
-
-                function resetSaveButton() {
-                    saveVatButton.disabled = false;
-                    saveVatButton.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save Data';
-                }
-
-                const successCallback = () => {
-                    if (isUpdate) {
-                        displayMessageBox("✅ Updated successfully", 'info');
-                        setTimeout(() => {
-                            closeVatModal();
-                            loadVatRecords(vatRecordsToShow);
-                        }, 1500);
-                    } else {
-                        vatForm.reset();
-                        vatNameInput.readOnly = false;
-                        vatStatusMsg.textContent = "✅ VAT entry saved!";
-                        vatStatusMsg.style.display = "block";
-                        loadNextVatSN();
-                        panCheckStatus.style.display = "none";
-                         if (vatTableContainer.style.display === "block") {
-                            loadVatRecords(vatRecordsToShow); 
-                        }
-                    }
-                    resetSaveButton();
-                };
-
-                const failureCallback = (err) => {
-                    const action = isUpdate ? "update" : "save";
-                    displayMessageBox(`❌ Couldn't ${action} VAT data: ${err.message}`, "error");
-                    resetSaveButton();
-                };
-
-                if (isUpdate) {
-                    google.script.run
-                        .withSuccessHandler(successCallback)
-                        .withFailureHandler(failureCallback)
-                        .updateVatEntry(data);
-                } else {
-                    google.script.run
-                        .withSuccessHandler(successCallback)
-                        .withFailureHandler(failureCallback)
-                        .submitVatEntry(data);
-                }
-            });
-
-            window.openVatModal = function (isEdit = false) {
-                document.getElementById("isVatEditMode").value = isEdit;
-                vatModal.style.display = "flex";
-                saveVatButton.textContent = isEdit ? '🔄 Update & Save' : '💾 Save Data';
-
-                if (!isEdit) {
-                    vatForm.reset();
-                    loadNextVatSN();
-                    vatNameInput.readOnly = false;
-                    panCheckStatus.style.display = "none";
-                    vatStatusMsg.style.display = "none";
-                }
-            };
-
-            window.closeVatModal = function () {
-                vatModal.style.display = "none";
-                vatForm.reset();
-                document.getElementById("isVatEditMode").value = 'false';
-                vatNameInput.readOnly = false;
-                panCheckStatus.style.display = "none";
-                vatStatusMsg.style.display = "none";
-            };
-
-            // START OF CHANGE: VAT Table Logic
-            window.toggleViewVatTable = function() {
-                const viewVatShortcut = document.getElementById("viewVatShortcut");
-                const isVisible = vatTableContainer.style.display === "block";
-
-                if (!isVisible) {
-                    vatRecordsToShow = 10;
-                    vatTableContainer.style.display = "block";
-                    viewVatShortcut.querySelector("span").textContent = "Hide VAT";
-                    loadVatRecords(vatRecordsToShow);
-                } else {
-                    vatTableContainer.style.display = "none";
-                    viewMoreVatContainer.style.display = "none";
-                    viewVatShortcut.querySelector("span").textContent = "View VAT";
-                    vatTableBody.innerHTML = '';
-                }
-            }
-
-            function loadVatRecords(count) {
-                if (count <= 10) {
-                    vatTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Loading recent VAT records...</td></tr>`;
-                }
-                viewMoreVatBtn.textContent = "Loading...";
-                viewMoreVatBtn.disabled = true;
-
-                google.script.run
-                    .withSuccessHandler(function(records) {
-                        if (count <= 10) vatTableBody.innerHTML = '';
-
-                        if (!records || records.length === 0) {
-                            vatTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No recent VAT records found.</td></tr>`;
-                            viewMoreVatContainer.style.display = "none";
-                            return;
-                        }
-
-                        records.forEach(rowData => {
-                            const row = vatTableBody.insertRow();
-                            row.insertCell().textContent = rowData[0]; // SN
-                            row.insertCell().textContent = rowData[1]; // PAN Number
-                            row.insertCell().textContent = rowData[2]; // Name
-
-                            const actionCell = row.insertCell();
-                            actionCell.style.textAlign = 'center';
-                            actionCell.innerHTML = `<button class="edit-button"><i data-lucide="edit-2"></i>Edit</button>`;
-                            const editButton = actionCell.querySelector('.edit-button');
-                            lucide.createIcons({ nodes: [editButton.querySelector('svg')] });
-
-                            editButton.addEventListener('click', () => {
-                                confirmEditVatRecord(rowData);
-                            });
-                        });
-
-                        viewMoreVatContainer.style.display = "block";
-                        viewMoreVatBtn.textContent = "View More Results";
-                        viewMoreVatBtn.disabled = false;
-                        viewMoreVatBtn.style.display = (records.length < count) ? 'none' : 'inline-block';
-                    })
-                    .withFailureHandler(function(error) {
-                        console.error("Error loading VAT records:", error);
-                        vatTableBody.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Error loading records: ${error.message}</td></tr>`;
-                        viewMoreVatBtn.textContent = "View More Results";
-                        viewMoreVatBtn.disabled = false;
-                    })
-                    .getRecentVatRecords(count);
-            }
-
-            viewMoreVatBtn.addEventListener('click', function() {
-                vatRecordsToShow += 5;
-                loadVatRecords(vatRecordsToShow);
-            });
-
-            function confirmEditVatRecord(rowData) {
-                const pan = rowData[1];
-                const message = `Do you want to edit the entry for PAN ${pan}?`;
-
-                displayConfirmBox(message, () => {
-                    editVatRecord(rowData);
-                });
-            }
-
-            function editVatRecord(rowData) {
-                const [sn, panNumber, name] = rowData;
-                openVatModal(true);
-                vatSnInput.value = sn;
-                vatPanNumberInput.value = panNumber;
-                vatNameInput.value = name;
-            }
-            // END OF CHANGE
-
 
             // Global click handler for modals and message box
             window.onclick = function (event) {
                 const msgBox = document.getElementById("messageBox");
                 if (event.target === salesModal) closeSalesModal();
                 if (event.target === purchaseModal) closePurchaseModal();
-                if (event.target === vatModal) closeVatModal();
                 if (msgBox && event.target === msgBox && !event.target.closest('.message-box-confirm .content')) {
                     msgBox.remove();
                 }
@@ -2083,8 +1791,88 @@
                 messageBox.appendChild(content);
                 document.body.appendChild(messageBox);
             }
+            
+            // Initial Load
+            loadDashboardSummary();
 
         });
+function getNextVatSn() {
+  if (!VAT_NO_SPREADSHEET_ID) {
+    throw new Error("VAT_NO_SPREADSHEET_ID is not configured. Please update code.gs with your VAT NO Spreadsheet ID.");
+  }
+  
+  try {
+    const externalSs = SpreadsheetApp.openById(VAT_NO_SPREADSHEET_ID);
+    const vatSheet = externalSs.getSheetByName("database");
+    
+    if (!vatSheet) {
+      Logger.log("Error: 'database' sheet not found in external 'VAT NO' spreadsheet for SN generation.");
+      throw new Error("The 'database' sheet was not found in the external 'VAT NO' spreadsheet. Please ensure it exists and is correctly named.");
+    }
+    
+    const lastRow = vatSheet.getLastRow();
+    if (lastRow < 2) return 1; // If only headers exist, start with 1
+    
+    const lastSN = vatSheet.getRange(lastRow, 1).getValue();
+    return (Number(lastSN) || 0) + 1;
+    
+  } catch (error) {
+    Logger.log("Error accessing VAT spreadsheet: " + error.message);
+    throw new Error("Cannot access VAT spreadsheet. Please check the spreadsheet ID and permissions.");
+  }
+}
+
+/**
+ * Enhanced submitVatEntry function with better error handling
+ * @param {Object} data - The VAT entry data object from the client-side.
+ */
+
+    let panDebounceTimeout;
+    function handlePanInput(pan) {
+      clearTimeout(panDebounceTimeout);
+      panDebounceTimeout = setTimeout(() => {
+          if (pan && pan.length >= 9) { 
+            google.script.run.withSuccessHandler(function(name) {
+              const nameField = document.getElementById('name');
+              if (name && nameField) {
+                nameField.value = name;
+              }
+            }).getClientNameByPan(pan);
+          }
+      }, 300); // Debounce to avoid too many calls
+    }
+
+    function submitVatForm(e) {
+      e.preventDefault();
+      const messageDiv = document.getElementById('vat-message');
+      messageDiv.textContent = 'Submitting...';
+      
+      const data = {
+        sn: document.getElementById('sn').value,
+        panNumber: document.getElementById('pan').value,
+        name: document.getElementById('name').value,
+      };
+
+      google.script.run.withSuccessHandler(function(response) {
+        messageDiv.textContent = response.message;
+        messageDiv.style.color = response.success ? 'green' : 'red';
+        
+        if(response.success) {
+          document.getElementById('pan').value = '';
+          document.getElementById('name').value = '';
+          document.getElementById('pan').focus();
+          getNextVatSn(); // Refresh S.N. for the next entry
+        }
+      }).submitVatEntry(data);
+    }
+
+    // --- Initialization ---
+    const vatForm = document.getElementById('vat-form');
+    if (vatForm) {
+        vatForm.addEventListener('submit', submitVatForm);
+    }
+    getNextVatSn();
+
     </script>
 </body>
 </html>

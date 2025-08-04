@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Account Statement</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+    <style>
+        :root {
+            --blue: #1e3a8a;
+            --blue-dark: #1e40af;
+            --gray-bg: #f8fafc;
+            --gray-border: #e2e8f0;
+            --gray-light-text: #64748b;
+            --text-gray: #475569;
+            --text-dark: #1e293b;
+            --white: #ffffff;
+            --green: #27ae60;
+            --red: #c0392b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-bg);
+            color: var(--text-gray);
+            margin: 0;
+        }
+
+        .header {
+            background: var(--blue);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 500;
+        }
+
+        .header .brand {
+            font-weight: 600;
+            font-size: 20px;
+        }
+
+        .sidebar {
+            background: #1e3a8a;
+            width: 200px;
+            padding: 20px 12px;
+            color: white;
+            position: fixed;
+            top: 66px;
+            bottom: 0;
+            left: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .sidebar a.active {
+            background: #1e40af;
+            font-weight: 600;
+        }
+
+        .sidebar a svg {
+            margin-right: 7px;
+            stroke-width: 1.5;
+        }
+
+        .sidebar a:hover {
+            background: #334155;
+        }
+
+        .main {
+            margin-left: 230px;
+            padding: 30px;
+            padding-top: 90px;
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .page-header h1 {
+            font-size: 28px;
+            color: var(--text-dark);
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .page-header p {
+            margin: 4px 0 0;
+            font-size: 16px;
+        }
+
+        .page-header-left {
+            flex: 1;
+        }
+
+        .print-btn {
+            padding: 12px 20px;
+            border: none;
+            background-color: var(--green);
+            color: var(--white);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .print-btn.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .print-btn:hover {
+            background-color: #219a52;
+        }
+
+        .filter-container {
+            background-color: var(--white);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-border);
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 100;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 20px;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-gray);
+        }
+
+        .filter-group input, .filter-group .choices__inner {
+            padding: 10px 12px;
+            border: 1px solid var(--gray-border);
+            border-radius: 8px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+             min-height: 43px;
+        }
+
+        .filter-group button {
+            padding: 12px 16px;
+            border: none;
+            background-color: var(--blue);
+            color: var(--white);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            height: 43px;
+        }
+        .filter-group button:hover {
+            background-color: var(--blue-dark);
+        }
+        
+        .statement-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .statement-section {
+            background-color: var(--white);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--gray-border);
+        }
+
+        .statement-section h2 {
+            font-size: 20px;
+            color: var(--text-dark);
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--gray-border);
+        }
+
+        .initial-message, #loadingState {
+            text-align: center;
+            color: var(--text-gray);
+            padding: 40px;
+        }
+         .initial-message i, #loadingState i {
+            margin-bottom: 12px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .statement-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .statement-table thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-gray);
+            text-transform: uppercase;
+            font-size: 12px;
+            position: sticky;
+            top: 0;
+            background-color: var(--gray-bg);
+            z-index: 1;
+        }
+
+        .statement-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--gray-border);
+            color: var(--text-dark);
+            vertical-align: middle;
+        }
+
+        .statement-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .statement-table tfoot {
+            position: sticky;
+            bottom: -1px;
+            z-index: 1;
+        }
+        .statement-table tfoot tr {
+            background-color: var(--gray-bg);
+            font-weight: bold;
+        }
+        .statement-table tfoot td {
+            border-top: 2px solid var(--gray-border);
+        }
+
+        .summary-table {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .summary-table td {
+            padding: 10px 15px;
+            font-size: 15px;
+        }
+        .summary-table tr:last-child td {
+            border-top: 2px solid var(--gray-border);
+            font-size: 16px;
+            font-weight: 700;
+            padding: 12px 15px;
+        }
+
+        .text-right { text-align: right; }
+        .text-bold { font-weight: 600; }
+        .text-green { color: var(--green); }
+        .text-red { color: var(--red); }
+
+        /* Print Styles */
+        @media print {
+            .header, .sidebar, .filter-container, .print-btn {
+                display: none !important;
+            }
+            
+            .main {
+                margin-left: 0 !important;
+                padding: 10px !important;
+                padding-top: 0 !important;
+            }
+            
+            .page-header {
+                margin-bottom: 15px;
+                text-align: center;
+            }
+            
+            .statement-section {
+                box-shadow: none;
+                border: 1px solid #000;
+                margin-bottom: 15px;
+                page-break-inside: avoid;
+                padding: 15px;
+            }
+            
+            .statement-section h2 {
+                font-size: 16px;
+                margin-bottom: 10px;
+                padding-bottom: 8px;
+            }
+            
+            .statement-table {
+                font-size: 10px;
+            }
+            
+            .statement-table td {
+                padding: 6px 8px;
+            }
+            
+            .statement-table thead th {
+                background-color: #f0f0f0 !important;
+                border: 1px solid #000;
+                padding: 6px 8px;
+                font-size: 9px;
+            }
+            
+            .statement-table td {
+                border: 1px solid #000;
+            }
+            
+            .summary-table {
+                max-width: 100%;
+                font-size: 11px;
+            }
+            
+            .summary-table td {
+                padding: 6px 10px;
+            }
+            
+            .table-wrapper {
+                max-height: none;
+                overflow: visible;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+                font-size: 12px;
+            }
+            
+            .statement-container {
+                gap: 15px;
+            }
+            
+            /* Print header styles */
+            #print-header h1 {
+                font-size: 18px !important;
+                margin: 0 !important;
+            }
+            
+            #print-header h2 {
+                font-size: 14px !important;
+                margin: 5px 0 !important;
+            }
+            
+            #print-header p {
+                font-size: 10px !important;
+                margin: 2px 0 !important;
+            }
+            
+            #print-header {
+                margin-bottom: 15px !important;
+                padding-bottom: 10px !important;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .filter-grid { grid-template-columns: 1fr; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; padding: 20px; padding-top: 90px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand">📘 Account Statement</div>
+    </div>
+
+    <div class="sidebar">
+        <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev" target="_self"><i data-lucide="layout-dashboard"></i>Dashboard</a>
+        <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=sales" target="_self"><i data-lucide="shopping-cart"></i>Sales</a>
+        <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=purchase"><i data-lucide="package"></i>Purchase</a>
+        <a href="#"><i data-lucide="file-text"></i>VAT</a>
+        <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=ledger" class="active"><i data-lucide="book-open"></i>Ledger</a>
+        <a href="#"><i data-lucide="calendar"></i>Reports</a>
+        <a href="#"><i data-lucide="bar-chart-2"></i>Analytics</a>
+    </div>
+
+    <div class="main">
+        <div class="page-header">
+            <div class="page-header-left">
+                <h1>Account Statement</h1>
+                <p>View sales and purchase history for any account</p>
+            </div>
+            <button id="printBtn" class="print-btn">
+                <i data-lucide="printer" style="width:16px; height:16px;"></i>
+                Print Statement
+            </button>
+        </div>
+
+        <div class="filter-container">
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="accountFilterSelect">Account Name</label>
+                    <select id="accountFilterSelect" placeholder="Select an account..."></select>
+                </div>
+                <div class="filter-group">
+                    <label for="startDate">Start Date (BS)</label>
+                    <input type="text" id="startDate" name="startDate" placeholder="YYYY-MM-DD">
+                </div>
+                <div class="filter-group">
+                    <label for="endDate">End Date (BS)</label>
+                    <input type="text" id="endDate" name="endDate" placeholder="YYYY-MM-DD">
+                </div>
+                <div class="filter-group">
+                    <button id="viewStatementBtn">
+                        <i data-lucide="search" style="width:16px; height:16px; margin-right: 8px; vertical-align: middle;"></i>View Statement
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="statementContainer" class="statement-container">
+             <div class="initial-message">
+                 <i data-lucide="info" size="48"></i>
+                 <p>Please select an account and date range to view the statement.</p>
+             </div>
+             <div id="loadingState" style="display: none;">
+                <i data-lucide="loader-2" class="spin-icon"></i>
+                <p>Fetching statement details...</p>
+             </div>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+
+        // --- DOM Elements ---
+        const viewStatementBtn = document.getElementById('viewStatementBtn');
+        const printBtn = document.getElementById('printBtn');
+        const accountSelectElement = document.getElementById('accountFilterSelect');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const statementContainer = document.getElementById('statementContainer');
+        const loadingState = document.getElementById('loadingState');
+        
+        let accountChoices;
+        let currentStatementData = null;
+
+        // --- Helper functions ---
+        const formatToRupees = (num) => {
+            const number = Number(num || 0);
+            return number.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
+
+        // Format Nepali date from various formats
+        const formatNepaliDate = (dateStr) => {
+            if (!dateStr) return '';
+            
+            // If it's already in YYYY-MM-DD format, return as is
+            if (typeof dateStr === 'string' && dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                return dateStr;
+            }
+            
+            // If it's a Date object or other format, try to extract Nepali date
+            // This assumes the backend is already providing Nepali dates
+            return String(dateStr).trim();
+        };
+        
+        // --- Initialize Account Dropdown ---
+        function initializeAccountFilter() {
+            google.script.run
+                .withSuccessHandler(accountNames => {
+                    if (accountChoices) accountChoices.destroy();
+                    accountSelectElement.innerHTML = '';
+                    const options = accountNames.map(name => ({ value: name, label: name }));
+                    accountChoices = new Choices(accountSelectElement, {
+                        choices: options,
+                        searchEnabled: true,
+                        itemSelectText: '',
+                        placeholder: true,
+                        placeholderValue: 'Select an account...'
+                    });
+                })
+                .withFailureHandler(handleError)
+                .getLedgerAccountNames();
+        }
+
+        // --- Print functionality ---
+        function printStatement() {
+            if (!currentStatementData) {
+                alert('No statement data to print. Please generate a statement first.');
+                return;
+            }
+            
+            const accountName = accountChoices.getValue(true);
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+            
+            // Add print header information
+            const originalTitle = document.title;
+            document.title = `Account Statement - ${accountName} (${startDate} to ${endDate})`;
+            
+            // Create print header
+            const printHeader = document.createElement('div');
+            printHeader.id = 'print-header';
+            printHeader.innerHTML = `
+                <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #000; padding-bottom: 15px;">
+                    <h1 style="margin: 0; font-size: 24px;">Account Statement</h1>
+                    <h2 style="margin: 10px 0; font-size: 18px;">Account: ${accountName}</h2>
+                    <p style="margin: 5px 0; font-size: 14px;">Period: ${startDate} to ${endDate} (BS)</p>
+                    <p style="margin: 5px 0; font-size: 12px; color: #666;">Generated on: ${new Date().toLocaleDateString()}</p>
+                </div>
+            `;
+            
+            document.body.insertBefore(printHeader, document.body.firstChild);
+            
+            // Print
+            window.print();
+            
+            // Clean up
+            document.body.removeChild(printHeader);
+            document.title = originalTitle;
+        }
+
+        // --- Main function to load statement data ---
+        function loadStatementData() {
+            const accountName = accountChoices.getValue(true);
+            const startDateBS = startDateInput.value;
+            const endDateBS = endDateInput.value;
+            const datePattern = /^20\d{2}-\d{2}-\d{2}$/;
+
+            if (!accountName) { alert('Please select an account.'); return; }
+            if (!startDateBS || !endDateBS) { alert('Please enter both a start and end date (BS).'); return; }
+            if (!datePattern.test(startDateBS) || !datePattern.test(endDateBS)) { alert('Please enter dates in YYYY-MM-DD format.'); return; }
+
+            statementContainer.innerHTML = '';
+            statementContainer.appendChild(loadingState);
+            loadingState.style.display = 'block';
+            printBtn.classList.remove('show');
+
+            google.script.run
+                .withSuccessHandler(renderStatement)
+                .withFailureHandler(handleError)
+                .getAccountStatement(accountName, startDateBS, endDateBS);
+        }
+
+        // --- Render Statement Data ---
+        function renderStatement(data) {
+            currentStatementData = data;
+            loadingState.style.display = 'none';
+            statementContainer.innerHTML = ''; // Clear loading
+
+            const hasSales = data.sales.transactions.length > 0;
+            const hasPurchases = data.purchases.transactions.length > 0;
+
+            if (!hasSales && !hasPurchases) {
+                statementContainer.innerHTML = '<div class="initial-message"><p>No transactions found for the selected criteria.</p></div>';
+                printBtn.classList.remove('show');
+                return;
+            }
+
+            // Show print button
+            printBtn.classList.add('show');
+
+            // --- Render Sales Table ---
+            if (hasSales) {
+                const salesSection = document.createElement('div');
+                salesSection.className = 'statement-section';
+                let tableHTML = `<h2>Sales Details</h2><div class="table-wrapper"><table class="statement-table"><thead><tr>
+                                    <th>Date (BS)</th><th>Bill No.</th><th class="text-right">Sales (Rs.)</th>
+                                    <th class="text-right">VAT (Rs.)</th><th class="text-right">Total (Rs.)</th>
+                                 </tr></thead><tbody>`;
+                data.sales.transactions.forEach(tx => {
+                    tableHTML += `<tr>
+                                    <td>${formatNepaliDate(tx.date)}</td>
+                                    <td>${tx.vchNo || ''}</td>
+                                    <td class="text-right">${formatToRupees(tx.amount)}</td>
+                                    <td class="text-right">${formatToRupees(tx.vat)}</td>
+                                    <td class="text-right text-bold">${formatToRupees(tx.total)}</td>
+                                  </tr>`;
+                });
+                tableHTML += `</tbody><tfoot><tr>
+                                <td colspan="2" class="text-bold">Total Sales</td>
+                                <td class="text-right text-bold">${formatToRupees(data.sales.totalAmount)}</td>
+                                <td class="text-right text-bold">${formatToRupees(data.sales.totalVat)}</td>
+                                <td class="text-right text-bold">${formatToRupees(data.sales.grandTotal)}</td>
+                              </tr></tfoot></table></div>`;
+                salesSection.innerHTML = tableHTML;
+                statementContainer.appendChild(salesSection);
+            }
+
+            // --- Render Purchase Table (Updated with Type column) ---
+            if (hasPurchases) {
+                const purchaseSection = document.createElement('div');
+                purchaseSection.className = 'statement-section';
+                let tableHTML = `<h2>Purchase Details</h2><div class="table-wrapper"><table class="statement-table"><thead><tr>
+                                     <th>Date (BS)</th><th>Bill No.</th><th>Type</th><th class="text-right">Purchase (Rs.)</th>
+                                     <th class="text-right">VAT (Rs.)</th><th class="text-right">Total (Rs.)</th>
+                                 </tr></thead><tbody>`;
+                data.purchases.transactions.forEach(tx => {
+                    tableHTML += `<tr>
+                                    <td>${formatNepaliDate(tx.date)}</td>
+                                    <td>${tx.vchNo || ''}</td>
+                                    <td>${tx.type || 'N/A'}</td>
+                                    <td class="text-right">${formatToRupees(tx.amount)}</td>
+                                    <td class="text-right">${formatToRupees(tx.vat)}</td>
+                                    <td class="text-right text-bold">${formatToRupees(tx.total)}</td>
+                                  </tr>`;
+                });
+                tableHTML += `</tbody><tfoot><tr>
+                                <td colspan="3" class="text-bold">Total Purchases</td>
+                                <td class="text-right text-bold">${formatToRupees(data.purchases.totalAmount)}</td>
+                                <td class="text-right text-bold">${formatToRupees(data.purchases.totalVat)}</td>
+                                <td class="text-right text-bold">${formatToRupees(data.purchases.grandTotal)}</td>
+                              </tr></tfoot></table></div>`;
+                purchaseSection.innerHTML = tableHTML;
+                statementContainer.appendChild(purchaseSection);
+            }
+
+            // --- Render Compact Summary Table ---
+            const summarySection = document.createElement('div');
+            summarySection.className = 'statement-section';
+            const netAmount = data.summary.netPayableReceivable;
+            const netStatus = netAmount >= 0 ? 'Receivable' : 'Payable';
+            const netClass = netAmount >= 0 ? 'text-green' : 'text-red';
+            
+            // Only show summary if there are transactions
+            if (hasSales || hasPurchases) {
+                summarySection.innerHTML = `<h2>Account Summary</h2>
+                    <table class="statement-table summary-table">
+                        <tbody>
+                            ${hasSales ? `<tr>
+                                <td>Total Sales (Including VAT)</td>
+                                <td class="text-right text-bold">${formatToRupees(data.sales.grandTotal)}</td>
+                            </tr>` : ''}
+                            ${hasPurchases ? `<tr>
+                                <td>Total Purchases (Including VAT)</td>
+                                <td class="text-right text-bold">${formatToRupees(data.purchases.grandTotal)}</td>
+                            </tr>` : ''}
+                            <tr>
+                                <td class="text-bold">Net ${netStatus}</td>
+                                <td class="text-right text-bold ${netClass}">${formatToRupees(Math.abs(netAmount))}</td>
+                            </tr>
+                        </tbody>
+                    </table>`;
+                statementContainer.appendChild(summarySection);
+            }
+        }
+
+        // --- Error Handling ---
+        function handleError(error) {
+            loadingState.style.display = 'none';
+            console.error("Statement Error:", error);
+            statementContainer.innerHTML = `<div class="initial-message"><p style="color: var(--red);">Error: ${error.message}. Please check the console and try again.</p></div>`;
+            printBtn.classList.remove('show');
+        }
+
+        // --- Event Listeners ---
+        viewStatementBtn.addEventListener('click', loadStatementData);
+        printBtn.addEventListener('click', printStatement);
+
+        // --- Add spinning animation to loader icon ---
+        const spinIconCss = document.createElement('style');
+        spinIconCss.innerHTML = `@keyframes spin { 100% { transform: rotate(360deg); } } .spin-icon { animation: spin 1.5s linear infinite; }`;
+        document.head.appendChild(spinIconCss);
+
+        // --- Initial Load ---
+        initializeAccountFilter();
+    });
+</script>
+</body>
+</html>

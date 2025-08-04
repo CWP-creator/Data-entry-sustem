@@ -658,9 +658,9 @@
     <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev" class="active"  target="self"><i data-lucide="layout-dashboard"></i>Dashboard</a>
     <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=sales" target="self">
     <i data-lucide="shopping-cart"></i>Sales</a>
-    <a href="#"><i data-lucide="package"></i>Purchase</a>
+    <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=purchase"><i data-lucide="package"></i>Purchase</a>
     <a href="#"><i data-lucide="file-text"></i>VAT</a>
-    <a href="#"><i data-lucide="book-open"></i>Ledger</a>
+    <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=ledger"><i data-lucide="book-open"></i>Ledger</a>
     <a href="#"><i data-lucide="calendar"></i>Reports</a>
     <a href="#"><i data-lucide="bar-chart-2"></i>Analytics</a>
 </div>
@@ -883,996 +883,1199 @@
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            lucide.createIcons();
-            
-            // --- Global Variables ---
-            let clientMap = {};
-            let choicesInstance;
-            let supplierMap = {};
-            let purchaseChoicesInstance;
-            
-            // --- Sales Modal Elements ---
-            const salesModal = document.getElementById("salesModal");
-            const amountInput = document.getElementById("amount");
-            const vatInput = document.getElementById("vatAmount");
-            const totalInput = document.getElementById("total");
-            const snInput = document.getElementById("sn");
-            const salesForm = document.getElementById("salesForm");
-            const saveSalesBtn = document.getElementById("saveButton");
-            const salesStatusMsg = document.createElement("div");
-            salesStatusMsg.style.marginTop = "10px";
-            salesStatusMsg.style.color = "#16a34a";
-            salesStatusMsg.style.fontWeight = "600";
-            salesStatusMsg.style.display = "none";
-            salesForm.querySelector(".modal-footer").appendChild(salesStatusMsg);
+    document.addEventListener("DOMContentLoaded", () => {
+    lucide.createIcons();
 
-            // Sales Date conversion elements
-            const dateADInput = document.getElementById("dateAD");
-            const dateBSInput = document.getElementById("dateBS");
-            const adConversionStatus = document.getElementById("adConversionStatus");
-            const bsConversionStatus = document.getElementById("bsConversionStatus");
-            
-            // Sales Table and "View More" Elements
-            const salesTableContainer = document.getElementById("salesTableContainer");
-            const salesTableBody = document.getElementById("salesTableBody");
-            const viewMoreContainer = document.getElementById("viewMoreContainer");
-            const viewMoreBtn = document.getElementById("viewMoreBtn");
-            let recordsToShow = 10;
+    // --- Global Variables ---
+    let clientMap = {};
+    let choicesInstance;
+    let supplierMap = {};
+    let purchaseChoicesInstance;
+    let panDebounceTimeout;
 
+    // --- Sales Modal Elements ---
+    const salesModal = document.getElementById("salesModal");
+    const amountInput = document.getElementById("amount");
+    const vatInput = document.getElementById("vatAmount");
+    const totalInput = document.getElementById("total");
+    const snInput = document.getElementById("sn");
+    const salesForm = document.getElementById("salesForm");
+    const saveSalesBtn = document.getElementById("saveButton");
+    const salesStatusMsg = document.createElement("div");
+    salesStatusMsg.style.marginTop = "10px";
+    salesStatusMsg.style.color = "#16a34a";
+    salesStatusMsg.style.fontWeight = "600";
+    salesStatusMsg.style.display = "none";
+    salesForm.querySelector(".modal-footer").appendChild(salesStatusMsg);
 
-            // --- Purchase Modal Elements ---
-            const purchaseModal = document.getElementById("purchaseModal");
-            const purchaseSnInput = document.getElementById("purchaseSn");
-            const purchaseBillNumberInput = document.getElementById("purchaseBillNumber");
-            const purchaseDateADInput = document.getElementById("purchaseDateAD");
-            const purchaseDateBSInput = document.getElementById("purchaseDateBS");
-            const purchaseAdConversionStatus = document.getElementById("purchaseAdConversionStatus");
-            const purchaseBsConversionStatus = document.getElementById("purchaseBsConversionStatus");
-            const supplierNameSelect = document.getElementById("supplierName");
-            const supplierPanNumberInput = document.getElementById("supplierPanNumber");
-            const purchaseTypeSelect = document.getElementById("purchaseType");
-            const purchaseAmountInput = document.getElementById("purchaseAmount");
-            const purchaseVatAmountInput = document.getElementById("purchaseVatAmount");
-            const purchaseTotalInput = document.getElementById("purchaseTotal");
-            const purchaseForm = document.getElementById("purchaseForm");
-            const savePurchaseBtn = purchaseForm.querySelector("button[type='submit']");
-            const purchaseStatusMsg = document.createElement("div");
-            let purchaseRecordsToShow = 10;
-            purchaseStatusMsg.style.marginTop = "10px";
-            purchaseStatusMsg.style.color = "#16a34a";
-            purchaseStatusMsg.style.fontWeight = "600";
-            purchaseStatusMsg.style.display = "none";
-            purchaseForm.querySelector(".modal-footer").appendChild(purchaseStatusMsg);
+    // Sales Date conversion elements
+    const dateADInput = document.getElementById("dateAD");
+    const dateBSInput = document.getElementById("dateBS");
+    const adConversionStatus = document.getElementById("adConversionStatus");
+    const bsConversionStatus = document.getElementById("bsConversionStatus");
+
+    // Sales Table and "View More" Elements
+    const salesTableContainer = document.getElementById("salesTableContainer");
+    const salesTableBody = document.getElementById("salesTableBody");
+    const viewMoreContainer = document.getElementById("viewMoreContainer");
+    const viewMoreBtn = document.getElementById("viewMoreBtn");
+    let recordsToShow = 10;
 
 
-            // Helper function to format numbers with commas
-            function formatNumber(num) {
-                if (isNaN(num) || num === null || num === undefined) {
-                    return "0.00";
-                }
-                return Number(num).toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            }
+    // --- Purchase Modal Elements ---
+    const purchaseModal = document.getElementById("purchaseModal");
+    const purchaseSnInput = document.getElementById("purchaseSn");
+    const purchaseBillNumberInput = document.getElementById("purchaseBillNumber");
+    const purchaseDateADInput = document.getElementById("purchaseDateAD");
+    const purchaseDateBSInput = document.getElementById("purchaseDateBS");
+    const purchaseAdConversionStatus = document.getElementById("purchaseAdConversionStatus");
+    const purchaseBsConversionStatus = document.getElementById("purchaseBsConversionStatus");
+    const supplierNameSelect = document.getElementById("supplierName");
+    const supplierPanNumberInput = document.getElementById("supplierPanNumber");
+    const purchaseTypeSelect = document.getElementById("purchaseType");
+    const purchaseAmountInput = document.getElementById("purchaseAmount");
+    const purchaseVatAmountInput = document.getElementById("purchaseVatAmount");
+    const purchaseTotalInput = document.getElementById("purchaseTotal");
+    const purchaseForm = document.getElementById("purchaseForm");
+    const savePurchaseBtn = purchaseForm.querySelector("button[type='submit']");
+    const purchaseStatusMsg = document.createElement("div");
+    let purchaseRecordsToShow = 10;
+    purchaseStatusMsg.style.marginTop = "10px";
+    purchaseStatusMsg.style.color = "#16a34a";
+    purchaseStatusMsg.style.fontWeight = "600";
+    purchaseStatusMsg.style.display = "none";
+    purchaseForm.querySelector(".modal-footer").appendChild(purchaseStatusMsg);
 
-            // Helper function to format ISO date string to YYYY-MM-DD
-            function formatDateToYYYYMMDD(isoDateString) {
-                if (!isoDateString) return '';
-                const datePart = String(isoDateString).split('T')[0];
-                return datePart;
-            }
-            
-            // --- Dashboard Summary Logic ---
-            function loadDashboardSummary() {
-                google.script.run
-                    .withSuccessHandler(function(summary) {
-                        const sales = summary.monthlySales || 0;
-                        const purchases = summary.monthlyPurchases || 0;
-                        const netCash = sales - purchases;
-
-                        document.getElementById('monthlySalesValue').textContent = 'Rs. ' + formatNumber(sales);
-                        document.getElementById('monthlyPurchasesValue').textContent = 'Rs. ' + formatNumber(purchases);
-                        document.getElementById('netCashValue').textContent = 'Rs. ' + formatNumber(netCash);
-                    })
-                    .withFailureHandler(function(error) {
-                        console.error("Error loading dashboard summary:", error);
-                        document.getElementById('monthlySalesValue').textContent = 'Error';
-                        document.getElementById('monthlyPurchasesValue').textContent = 'Error';
-                        document.getElementById('netCashValue').textContent = 'Error';
-                    })
-                    .getDashboardSummary();
-            }
-
-            // --- Sales Table Logic ---
-            window.toggleViewSalesTable = function() {
-                const viewSalesShortcut = document.getElementById("viewSalesShortcut");
-                const isVisible = salesTableContainer.style.display === "block";
-
-                if (!isVisible) {
-                    recordsToShow = 10; // Reset count when opening
-                    salesTableContainer.style.display = "block";
-                    viewSalesShortcut.querySelector("span").textContent = "Hide Sales";
-                    loadClients().then(() => {
-                        loadSalesRecords(recordsToShow);
-                    });
-                } else {
-                    salesTableContainer.style.display = "none";
-                    viewMoreContainer.style.display = "none";
-                    viewSalesShortcut.querySelector("span").textContent = "View Sales";
-                    salesTableBody.innerHTML = '';
-                }
-            }
-
-            function loadSalesRecords(count) {
-                if (count <= 10) {
-                    salesTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">Loading recent sales records...</td></tr>`;
-                }
-                viewMoreBtn.textContent = "Loading...";
-
-                google.script.run
-                    .withSuccessHandler(function(records) {
-                        if (count <= 10) salesTableBody.innerHTML = '';
-
-                        if (!records || records.length === 0) {
-                            salesTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No recent sales records found.</td></tr>`;
-                            viewMoreContainer.style.display = "none";
-                            return;
-                        }
-
-                        if (count > 10) {
-                        const existingRows = salesTableBody.rows.length;
-                        records = records.slice(existingRows);
-                        }
-
-                        records.forEach(rowData => {
-                            const row = salesTableBody.insertRow();
-                            row.insertCell().textContent = rowData[0]; // SN
-                            row.insertCell().textContent = rowData[1]; // Bill No
-                            row.insertCell().textContent = rowData[3]; // Date (BS)
-                            row.insertCell().textContent = rowData[4]; // Name
-                            row.insertCell().textContent = rowData[5]; // PAN No
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[6]); // Sales Amount
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[7]); // VAT
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[8]); // Total
-
-                            const actionCell = row.insertCell();
-                            actionCell.style.textAlign = 'center';
-                            actionCell.innerHTML = `<button class="edit-button"><i data-lucide="edit-2"></i>Edit</button>`;
-                            const editButton = actionCell.querySelector('.edit-button');
-                            lucide.createIcons({ nodes: [editButton.querySelector('svg')] });
-
-                            editButton.addEventListener('click', () => {
-                                confirmEditSalesRecord(rowData);
-                            });
-                        });
-
-                        viewMoreContainer.style.display = "block";
-                        viewMoreBtn.textContent = "View More Results";
-                        viewMoreBtn.style.display = (records.length < 5 && count > 10) ? 'none' : 'inline-block';
-
-                    })
-                    .withFailureHandler(function(error) {
-                        console.error("Error loading sales records:", error);
-                        salesTableBody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Error loading records: ${error.message}</td></tr>`;
-                        viewMoreBtn.textContent = "View More Results";
-                    })
-                    .getRecentSalesRecords(count);
-            }
-
-            function confirmEditSalesRecord(rowData) {
-                const billNo = rowData[1];
-                const message = `Do you want to edit sales voucher no ${billNo}?`;
-
-                displayConfirmBox(message, () => {
-                    editSalesRecord(rowData);
-                });
-            }
+    // --- VAT Modal Elements ---
+    const vatModal = document.getElementById("vatModal");
+    const vatSnInput = document.getElementById("vatSn");
+    const vatPanNumberInput = document.getElementById("vatPanNumber");
+    const vatNameInput = document.getElementById("vatName");
+    const vatForm = document.getElementById("vatForm");
+    const saveVatButton = document.getElementById("saveVatButton");
+    const panCheckStatus = document.getElementById("panCheckStatus");
+    const vatStatusMsg = document.createElement("div");
+    vatStatusMsg.style.marginTop = "10px";
+    vatStatusMsg.style.color = "#16a34a";
+    vatStatusMsg.style.fontWeight = "600";
+    vatStatusMsg.style.display = "none";
+    if (vatForm) {
+        vatForm.querySelector(".modal-footer").appendChild(vatStatusMsg);
+    }
 
 
-            function editSalesRecord(rowData) {
-                const [sn, billNo, dateAD, dateBS, clientName, panNumber, salesAmount, vatAmount, totalAmount] = rowData;
+    // VAT Table and "View More" Elements
+    const vatTableContainer = document.getElementById("vatTableContainer");
+    const vatTableBody = document.getElementById("vatTableBody");
+    const viewMoreVatContainer = document.getElementById("viewMoreVatContainer");
+    const viewMoreVatBtn = document.getElementById("viewMoreVatBtn");
+    let vatRecordsToShow = 10;
 
-                openSalesModal(true).then(() => { 
-                    document.getElementById('sn').value = sn;
-                    document.getElementById('billNumber').value = billNo;
-                    document.getElementById('dateAD').value = formatDateToYYYYMMDD(dateAD);
-                    document.getElementById('dateBS').value = dateBS;
-                    
-                    if (choicesInstance) {
-                      choicesInstance.setChoiceByValue(String(clientName ||'').trim());
-                    } 
 
-                    document.getElementById('panNumber').value = panNumber;
-                    document.getElementById('amount').value = formatNumber(salesAmount); 
-                    document.getElementById('vatAmount').value = formatNumber(vatAmount);
-                    document.getElementById('total').value = formatNumber(totalAmount);
+    // Helper function to format numbers with commas
+    function formatNumber(num) {
+        if (isNaN(num) || num === null || num === undefined) {
+            return "0.00";
+        }
+        return Number(num).toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
 
-                    updateSalesVAT();
-                });
-            }
-            
-            viewMoreBtn.addEventListener('click', function() {
-                recordsToShow += 5;
+    // Helper function to format ISO date string to YYYY-MM-DD
+    function formatDateToYYYYMMDD(isoDateString) {
+        if (!isoDateString) return '';
+        const datePart = String(isoDateString).split('T')[0];
+        return datePart;
+    }
+
+    // --- Dashboard Summary Logic ---
+    function loadDashboardSummary() {
+        google.script.run
+            .withSuccessHandler(function(summary) {
+                const sales = summary.monthlySales || 0;
+                const purchases = summary.monthlyPurchases || 0;
+                const netCash = sales - purchases;
+
+                document.getElementById('monthlySalesValue').textContent = 'Rs. ' + formatNumber(sales);
+                document.getElementById('monthlyPurchasesValue').textContent = 'Rs. ' + formatNumber(purchases);
+                document.getElementById('netCashValue').textContent = 'Rs. ' + formatNumber(netCash);
+            })
+            .withFailureHandler(function(error) {
+                console.error("Error loading dashboard summary:", error);
+                document.getElementById('monthlySalesValue').textContent = 'Error';
+                document.getElementById('monthlyPurchasesValue').textContent = 'Error';
+                document.getElementById('netCashValue').textContent = 'Error';
+            })
+            .getDashboardSummary();
+    }
+
+    // --- Sales Table Logic ---
+    window.toggleViewSalesTable = function() {
+        const viewSalesShortcut = document.getElementById("viewSalesShortcut");
+        const isVisible = salesTableContainer.style.display === "block";
+
+        if (!isVisible) {
+            recordsToShow = 10; // Reset count when opening
+            salesTableContainer.style.display = "block";
+            viewSalesShortcut.querySelector("span").textContent = "Hide Sales";
+            loadClients().then(() => {
                 loadSalesRecords(recordsToShow);
             });
+        } else {
+            salesTableContainer.style.display = "none";
+            viewMoreContainer.style.display = "none";
+            viewSalesShortcut.querySelector("span").textContent = "View Sales";
+            salesTableBody.innerHTML = '';
+        }
+    }
 
+    function loadSalesRecords(count) {
+        if (count <= 10) {
+            salesTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">Loading recent sales records...</td></tr>`;
+        }
+        viewMoreBtn.textContent = "Loading...";
 
-            // --- Sales Form Logic ---
-            function updateSalesVAT() {
-                let rawValue = amountInput.value.replace(/,/g, "");
-                let amount = parseFloat(rawValue);
-                if (!isNaN(amount)) {
-                    let vat = amount * 0.13;
-                    let total = amount + vat;
-                    vatInput.value = formatNumber(vat);
-                    totalInput.value = formatNumber(total);
-                } else {
-                    vatInput.value = "";
-                    totalInput.value = "";
-                    if (rawValue === "") {
-                        amountInput.value = "";
-                    }
+        google.script.run
+            .withSuccessHandler(function(records) {
+                if (count <= 10) salesTableBody.innerHTML = '';
+
+                if (!records || records.length === 0) {
+                    salesTableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No recent sales records found.</td></tr>`;
+                    viewMoreContainer.style.display = "none";
+                    return;
                 }
+
+                if (count > 10) {
+                    const existingRows = salesTableBody.rows.length;
+                    records = records.slice(existingRows);
+                }
+
+                records.forEach(rowData => {
+                    const row = salesTableBody.insertRow();
+                    row.insertCell().textContent = rowData[0]; // SN
+                    row.insertCell().textContent = rowData[1]; // Bill No
+                    row.insertCell().textContent = rowData[3]; // Date (BS)
+                    row.insertCell().textContent = rowData[4]; // Name
+                    row.insertCell().textContent = rowData[5]; // PAN No
+                    row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[6]); // Sales Amount
+                    row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[7]); // VAT
+                    row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[8]); // Total
+
+                    const actionCell = row.insertCell();
+                    actionCell.style.textAlign = 'center';
+                    actionCell.innerHTML = `<button class="edit-button"><i data-lucide="edit-2"></i>Edit</button>`;
+                    const editButton = actionCell.querySelector('.edit-button');
+                    lucide.createIcons({
+                        nodes: [editButton.querySelector('svg')]
+                    });
+
+                    editButton.addEventListener('click', () => {
+                        confirmEditSalesRecord(rowData);
+                    });
+                });
+
+                viewMoreContainer.style.display = "block";
+                viewMoreBtn.textContent = "View More Results";
+                viewMoreBtn.style.display = (records.length < 5 && count > 10) ? 'none' : 'inline-block';
+
+            })
+            .withFailureHandler(function(error) {
+                console.error("Error loading sales records:", error);
+                salesTableBody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Error loading records: ${error.message}</td></tr>`;
+                viewMoreBtn.textContent = "View More Results";
+            })
+            .getRecentSalesRecords(count);
+    }
+
+    function confirmEditSalesRecord(rowData) {
+        const billNo = rowData[1];
+        const message = `Do you want to edit sales voucher no ${billNo}?`;
+
+        displayConfirmBox(message, () => {
+            editSalesRecord(rowData);
+        });
+    }
+
+
+    function editSalesRecord(rowData) {
+        const [sn, billNo, dateAD, dateBS, clientName, panNumber, salesAmount, vatAmount, totalAmount] = rowData;
+
+        openSalesModal(true).then(() => {
+            document.getElementById('sn').value = sn;
+            document.getElementById('billNumber').value = billNo;
+            document.getElementById('dateAD').value = formatDateToYYYYMMDD(dateAD);
+            document.getElementById('dateBS').value = dateBS;
+
+            if (choicesInstance) {
+                choicesInstance.setChoiceByValue(String(clientName || '').trim());
             }
-            amountInput.addEventListener("input", updateSalesVAT);
-            amountInput.addEventListener("blur", function() {
-                let rawValue = this.value.replace(/,/g, "");
-                let amount = parseFloat(rawValue);
-                if (!isNaN(amount) && rawValue !== "") {
-                    this.value = formatNumber(amount);
-                } else if (rawValue === "") {
-                    this.value = ""; 
-                }
-            });
+
+            document.getElementById('panNumber').value = panNumber;
+            document.getElementById('amount').value = formatNumber(salesAmount);
+            document.getElementById('vatAmount').value = formatNumber(vatAmount);
+            document.getElementById('total').value = formatNumber(totalAmount);
+
+            updateSalesVAT();
+        });
+    }
+
+    viewMoreBtn.addEventListener('click', function() {
+        recordsToShow += 5;
+        loadSalesRecords(recordsToShow);
+    });
 
 
-            function loadNextSalesSN() {
-                google.script.run.withSuccessHandler(sn => {
-                    snInput.value = sn;
-                }).getNextSN();
-            }
-
-            salesForm.addEventListener("submit", function (e) {
-                e.preventDefault();
-                saveSalesBtn.disabled = true;
-
-                const isUpdate = document.getElementById("isEditMode").value === 'true';
-                saveSalesBtn.textContent = isUpdate ? "Updating..." : "Saving...";
-                salesStatusMsg.style.display = "none";
-
-                const data = {
-                    sn: snInput.value,
-                    billNumber: document.getElementById("billNumber").value,
-                    dateAD: dateADInput.value,
-                    dateBS: dateBSInput.value,
-                    clientName: document.getElementById("clientName").value,
-                    panNumber: document.getElementById("panNumber").value,
-                    amount: amountInput.value.replace(/,/g, ""),
-                    vatAmount: vatInput.value.replace(/,/g, ""),
-                    total: totalInput.value.replace(/,/g, "")
-                };
-
-                function resetSaveButton() {
-                    saveSalesBtn.disabled = false;
-                    saveSalesBtn.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save';
-                }
-
-                const successCallback = (response) => {
-                    const successMessage = isUpdate ? "✅ Updated successfully" : "✅ Saved successfully";
-                    
-                    if (isUpdate) {
-                        displayMessageBox(successMessage, 'info');
-                        setTimeout(() => {
-                            closeSalesModal();
-                            loadSalesRecords(recordsToShow); 
-                            loadDashboardSummary();
-                        }, 1500);
-                    } else {
-                        salesForm.reset();
-                        vatInput.value = "";
-                        totalInput.value = "";
-                        document.getElementById("panNumber").value = "";
-                        if (choicesInstance) choicesInstance.destroy();
-                        loadClients();
-                        adConversionStatus.style.display = "none";
-                        bsConversionStatus.style.display = "none";
-                        salesStatusMsg.textContent = successMessage;
-                        salesStatusMsg.style.display = "block";
-                        loadNextSalesSN();
-                        if (salesTableContainer.style.display === "block") {
-                            loadSalesRecords(recordsToShow);
-                        }
-                        loadDashboardSummary();
-                    }
-                    resetSaveButton();
-                };
-
-                const failureCallback = (err) => {
-                    const action = isUpdate ? "update" : "save";
-                    displayMessageBox(`❌ Couldn't ${action} data: ${err.message}`, "error");
-                    resetSaveButton();
-                };
-
-                if (isUpdate) {
-                    google.script.run
-                        .withSuccessHandler(successCallback)
-                        .withFailureHandler(failureCallback)
-                        .updateSalesEntry(data);
-                } else {
-                    google.script.run
-                        .withSuccessHandler(successCallback)
-                        .withFailureHandler(failureCallback)
-                        .submitSalesEntry(data);
-                }
-            });
-
-            window.openSalesModal = async function (isEdit = false) { 
-                document.getElementById("isEditMode").value = isEdit;
-                salesModal.style.display = "flex";
-
-                if (!isEdit) {
-                    salesForm.reset();
-                    loadNextSalesSN();
-                    dateADInput.value = '';
-                    dateBSInput.value = '';
-                }
-                
-                await loadClients();
-
-                saveSalesBtn.textContent = isEdit ? '🔄 Update & Save' : '💾 Save';
-                adConversionStatus.style.display = "none";
-                bsConversionStatus.style.display = "none";
-            };
-
-            window.closeSalesModal = function () {
-                salesModal.style.display = "none";
-                salesStatusMsg.style.display = "none";
-                salesForm.reset();
-                if (choicesInstance) {
-                    choicesInstance.destroy(); 
-                }
-                document.getElementById("panNumber").value = "";
+    // --- Sales Form Logic ---
+    function updateSalesVAT() {
+        let rawValue = amountInput.value.replace(/,/g, "");
+        let amount = parseFloat(rawValue);
+        if (!isNaN(amount)) {
+            let vat = amount * 0.13;
+            let total = amount + vat;
+            vatInput.value = formatNumber(vat);
+            totalInput.value = formatNumber(total);
+        } else {
+            vatInput.value = "";
+            totalInput.value = "";
+            if (rawValue === "") {
                 amountInput.value = "";
+            }
+        }
+    }
+    amountInput.addEventListener("input", updateSalesVAT);
+    amountInput.addEventListener("blur", function() {
+        let rawValue = this.value.replace(/,/g, "");
+        let amount = parseFloat(rawValue);
+        if (!isNaN(amount) && rawValue !== "") {
+            this.value = formatNumber(amount);
+        } else if (rawValue === "") {
+            this.value = "";
+        }
+    });
+
+
+    function loadNextSalesSN() {
+        google.script.run.withSuccessHandler(sn => {
+            snInput.value = sn;
+        }).getNextSN();
+    }
+
+    salesForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        saveSalesBtn.disabled = true;
+
+        const isUpdate = document.getElementById("isEditMode").value === 'true';
+        saveSalesBtn.textContent = isUpdate ? "Updating..." : "Saving...";
+        salesStatusMsg.style.display = "none";
+
+        const data = {
+            sn: snInput.value,
+            billNumber: document.getElementById("billNumber").value,
+            dateAD: dateADInput.value,
+            dateBS: dateBSInput.value,
+            clientName: document.getElementById("clientName").value,
+            panNumber: document.getElementById("panNumber").value,
+            amount: amountInput.value.replace(/,/g, ""),
+            vatAmount: vatInput.value.replace(/,/g, ""),
+            total: totalInput.value.replace(/,/g, "")
+        };
+
+        function resetSaveButton() {
+            saveSalesBtn.disabled = false;
+            saveSalesBtn.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save';
+        }
+
+        const successCallback = (response) => {
+            const successMessage = isUpdate ? "✅ Updated successfully" : "✅ Saved successfully";
+
+            if (isUpdate) {
+                displayMessageBox(successMessage, 'info');
+                setTimeout(() => {
+                    closeSalesModal();
+                    loadSalesRecords(recordsToShow);
+                    loadDashboardSummary();
+                }, 1500);
+            } else {
+                salesForm.reset();
                 vatInput.value = "";
                 totalInput.value = "";
-                document.getElementById("isEditMode").value = 'false';
-                saveSalesBtn.textContent = "💾 Save";
+                document.getElementById("panNumber").value = "";
+                if (choicesInstance) choicesInstance.destroy();
+                loadClients();
                 adConversionStatus.style.display = "none";
                 bsConversionStatus.style.display = "none";
-            };
-
-
-            dateADInput.addEventListener("change", function() {
-                const adDate = this.value;
-                if (adDate) {
-                    bsConversionStatus.style.display = "block";
-                    bsConversionStatus.textContent = "Converting date...";
-                    bsConversionStatus.classList.remove("error");
-                    google.script.run
-                        .withSuccessHandler(bsDate => {
-                            if (bsDate) {
-                                dateBSInput.value = bsDate;
-                                bsConversionStatus.style.display = "none";
-                            } else {
-                                dateBSInput.value = "";
-                                bsConversionStatus.textContent = "Date not found in ADTOBS.";
-                                bsConversionStatus.classList.add("error");
-                            }
-                        })
-                        .withFailureHandler(err => {
-                            dateBSInput.value = "";
-                            bsConversionStatus.textContent = "Error converting: " + err.message;
-                            bsConversionStatus.classList.add("error");
-                        })
-                        .convertADtoBS(adDate);
-                } else {
-                    dateBSInput.value = "";
-                    bsConversionStatus.style.display = "none";
+                salesStatusMsg.textContent = successMessage;
+                salesStatusMsg.style.display = "block";
+                loadNextSalesSN();
+                if (salesTableContainer.style.display === "block") {
+                    loadSalesRecords(recordsToShow);
                 }
-            });
+                loadDashboardSummary();
+            }
+            resetSaveButton();
+        };
 
-            dateBSInput.addEventListener("change", function() {
-                const bsDate = this.value;
-                const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-                if (bsDate && datePattern.test(bsDate)) {
-                    adConversionStatus.style.display = "block";
-                    adConversionStatus.textContent = "Converting date...";
-                    adConversionStatus.classList.remove("error");
-                    google.script.run
-                        .withSuccessHandler(adDate => {
-                            if (adDate) {
-                                dateADInput.value = adDate; 
-                                adConversionStatus.style.display = "none";
-                            } else {
-                                adConversionStatus.textContent = "Date not found in ADTOBS.";
-                                adConversionStatus.classList.add("error");
-                            }
-                        })
-                        .withFailureHandler(err => {
-                            dateADInput.value = ""; 
-                            adConversionStatus.textContent = "Error converting: " + err.message;
-                            adConversionStatus.classList.add("error");
-                        })
-                        .convertBStoAD(bsDate);
-                } else {
-                    dateADInput.value = "";
-                    adConversionStatus.style.display = "none";
-                    if (bsDate && !datePattern.test(bsDate)) {
-                        adConversionStatus.style.display = "block";
-                        adConversionStatus.textContent = "Invalid format. Use YYYY-MM-DD.";
+        const failureCallback = (err) => {
+            const action = isUpdate ? "update" : "save";
+            displayMessageBox(`❌ Couldn't ${action} data: ${err.message}`, "error");
+            resetSaveButton();
+        };
+
+        if (isUpdate) {
+            google.script.run
+                .withSuccessHandler(successCallback)
+                .withFailureHandler(failureCallback)
+                .updateSalesEntry(data);
+        } else {
+            google.script.run
+                .withSuccessHandler(successCallback)
+                .withFailureHandler(failureCallback)
+                .submitSalesEntry(data);
+        }
+    });
+
+    window.openSalesModal = async function(isEdit = false) {
+        document.getElementById("isEditMode").value = isEdit;
+        salesModal.style.display = "flex";
+
+        if (!isEdit) {
+            salesForm.reset();
+            loadNextSalesSN();
+            dateADInput.value = '';
+            dateBSInput.value = '';
+        }
+
+        await loadClients();
+
+        saveSalesBtn.textContent = isEdit ? '🔄 Update & Save' : '💾 Save';
+        adConversionStatus.style.display = "none";
+        bsConversionStatus.style.display = "none";
+    };
+
+    window.closeSalesModal = function() {
+        salesModal.style.display = "none";
+        salesStatusMsg.style.display = "none";
+        salesForm.reset();
+        if (choicesInstance) {
+            choicesInstance.destroy();
+        }
+        document.getElementById("panNumber").value = "";
+        amountInput.value = "";
+        vatInput.value = "";
+        totalInput.value = "";
+        document.getElementById("isEditMode").value = 'false';
+        saveSalesBtn.textContent = "💾 Save";
+        adConversionStatus.style.display = "none";
+        bsConversionStatus.style.display = "none";
+    };
+
+
+    dateADInput.addEventListener("change", function() {
+        const adDate = this.value;
+        if (adDate) {
+            bsConversionStatus.style.display = "block";
+            bsConversionStatus.textContent = "Converting date...";
+            bsConversionStatus.classList.remove("error");
+            google.script.run
+                .withSuccessHandler(bsDate => {
+                    if (bsDate) {
+                        dateBSInput.value = bsDate;
+                        bsConversionStatus.style.display = "none";
+                    } else {
+                        dateBSInput.value = "";
+                        bsConversionStatus.textContent = "Date not found in ADTOBS.";
+                        bsConversionStatus.classList.add("error");
+                    }
+                })
+                .withFailureHandler(err => {
+                    dateBSInput.value = "";
+                    bsConversionStatus.textContent = "Error converting: " + err.message;
+                    bsConversionStatus.classList.add("error");
+                })
+                .convertADtoBS(adDate);
+        } else {
+            dateBSInput.value = "";
+            bsConversionStatus.style.display = "none";
+        }
+    });
+
+    dateBSInput.addEventListener("change", function() {
+        const bsDate = this.value;
+        const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+        if (bsDate && datePattern.test(bsDate)) {
+            adConversionStatus.style.display = "block";
+            adConversionStatus.textContent = "Converting date...";
+            adConversionStatus.classList.remove("error");
+            google.script.run
+                .withSuccessHandler(adDate => {
+                    if (adDate) {
+                        dateADInput.value = adDate;
+                        adConversionStatus.style.display = "none";
+                    } else {
+                        adConversionStatus.textContent = "Date not found in ADTOBS.";
                         adConversionStatus.classList.add("error");
                     }
-                }
-            });
-
-            function loadClients() {
-                return new Promise((resolve, reject) => {
-                    google.script.run.withSuccessHandler(function(clientData) {
-                        const select = document.getElementById("clientName");
-                        if (choicesInstance) {
-                            choicesInstance.destroy(); 
-                        }
-                        select.innerHTML = "";
-                        clientMap = {};
-
-                        select.appendChild(new Option('-- Select Client --', ''));
-
-                        clientData.forEach(function([name, pan]) {
-                            if (name && pan) {
-                                select.appendChild(new Option(name, name));
-                                clientMap[name] = pan;
-                            }
-                        });
-
-                        choicesInstance = new Choices(select, {
-                            searchEnabled: true,
-                            itemSelectText: "",
-                            shouldSort: false
-                        });
-
-                        select.addEventListener("change", function () {
-                            document.getElementById("panNumber").value = clientMap[this.value] || "";
-                        });
-                        resolve();
-
-                    }).withFailureHandler(reject).getClientList();
-                });
+                })
+                .withFailureHandler(err => {
+                    dateADInput.value = "";
+                    adConversionStatus.textContent = "Error converting: " + err.message;
+                    adConversionStatus.classList.add("error");
+                })
+                .convertBStoAD(bsDate);
+        } else {
+            dateADInput.value = "";
+            adConversionStatus.style.display = "none";
+            if (bsDate && !datePattern.test(bsDate)) {
+                adConversionStatus.style.display = "block";
+                adConversionStatus.textContent = "Invalid format. Use YYYY-MM-DD.";
+                adConversionStatus.classList.add("error");
             }
+        }
+    });
 
-            // --- Purchase Form Logic ---
-            function updatePurchaseVAT() {
-                let rawValue = purchaseAmountInput.value.replace(/,/g, "");
-                let amount = parseFloat(rawValue);
+    function loadClients() {
+        return new Promise((resolve, reject) => {
+            google.script.run.withSuccessHandler(function(clientData) {
+                const select = document.getElementById("clientName");
+                if (choicesInstance) {
+                    choicesInstance.destroy();
+                }
+                select.innerHTML = "";
+                clientMap = {};
 
-                const selectedPurchaseType = purchaseTypeSelect.value;
-                if (!isNaN(amount)) {
-                    if (selectedPurchaseType === "Non vat") {
-                        purchaseVatAmountInput.value = formatNumber(0);
-                        purchaseTotalInput.value = formatNumber(amount);
-                    } else {
-                        let vat = amount * 0.13;
-                        let total = amount + vat;
-                        purchaseVatAmountInput.value = formatNumber(vat);
-                        purchaseTotalInput.value = formatNumber(total);
+                select.appendChild(new Option('-- Select Client --', ''));
+
+                clientData.forEach(function([name, pan]) {
+                    if (name && pan) {
+                        select.appendChild(new Option(name, name));
+                        clientMap[name] = pan;
                     }
-                } else {
-                    purchaseVatAmountInput.value = "";
-                    purchaseTotalInput.value = "";
-                    if (rawValue === "") {
-                        purchaseAmountInput.value = "";
-                    }
-                }
-            }
-            purchaseAmountInput.addEventListener("input", updatePurchaseVAT);
-            purchaseAmountInput.addEventListener("blur", function() {
-                let rawValue = this.value.replace(/,/g, "");
-                let amount = parseFloat(rawValue);
-                if (!isNaN(amount) && rawValue !== "") {
-                    this.value = formatNumber(amount);
-                } else if (rawValue === "") {
-                    this.value = "";
-                }
-            });
-            purchaseTypeSelect.addEventListener("change", updatePurchaseVAT);
-
-            function loadNextPurchaseSN() {
-                google.script.run.withSuccessHandler(sn => {
-                    purchaseSnInput.value = sn;
-                }).getNextPurchaseSN();
-            }
-
-            function loadSuppliers() {
-                return new Promise((resolve, reject) => {
-                    google.script.run
-                        .withSuccessHandler(function(supplierData) {
-                            const select = document.getElementById("supplierName");
-                            if (purchaseChoicesInstance) {
-                                purchaseChoicesInstance.destroy();
-                            }
-                            select.innerHTML = "";
-                            supplierMap = {};
-                            select.appendChild(new Option("-- Select Supplier --", ""));
-                            supplierData.forEach(function([name, pan]) {
-                                if (name && pan) {
-                                    select.appendChild(new Option(name, name));
-                                    supplierMap[name] = pan;
-                                }
-                            });
-                            purchaseChoicesInstance = new Choices(select, {
-                                searchEnabled: true,
-                                itemSelectText: "",
-                                shouldSort: false,
-                            });
-                            select.addEventListener("change", function() {
-                                supplierPanNumberInput.value = supplierMap[this.value] || "";
-                            });
-                            resolve(); 
-                        })
-                        .withFailureHandler(reject) 
-                        .getClientList();
                 });
-            }
 
-            // --- Purchase Table Logic ---
-            window.toggleViewPurchaseTable = function() {
-                const purchaseTableContainer = document.getElementById("purchaseTableContainer");
-                const viewPurchasesShortcut = document.getElementById("viewPurchasesShortcut");
-                const isVisible = purchaseTableContainer.style.display === "block";
-
-                if (!isVisible) {
-                    purchaseRecordsToShow = 10; 
-                    purchaseTableContainer.style.display = "block";
-                    viewPurchasesShortcut.querySelector("span").textContent = "Hide Purchases";
-                    loadPurchaseRecords(purchaseRecordsToShow);
-                } else {
-                    purchaseTableContainer.style.display = "none";
-                    document.getElementById("viewMorePurchaseContainer").style.display = "none";
-                    viewPurchasesShortcut.querySelector("span").textContent = "View Purchases";
-                    document.getElementById("purchaseTableBody").innerHTML = '';
-                }
-            }
-
-            function loadPurchaseRecords(count) {
-                const purchaseTableBody = document.getElementById("purchaseTableBody");
-                const viewMorePurchaseBtn = document.getElementById("viewMorePurchaseBtn");
-                const viewMorePurchaseContainer = document.getElementById("viewMorePurchaseContainer");
-
-                if (count <= 10) {
-                    purchaseTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">Loading recent purchase records...</td></tr>`;
-                }
-                viewMorePurchaseBtn.textContent = "Loading...";
-                viewMorePurchaseBtn.disabled = true;
-
-                google.script.run
-                    .withSuccessHandler(function(records) {
-                        if (count <= 10) purchaseTableBody.innerHTML = ''; 
-
-                        if (!records || records.length === 0) {
-                            purchaseTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No recent purchase records found.</td></tr>`;
-                            viewMorePurchaseContainer.style.display = "none"; 
-                            return;
-                        }
-
-                        records.forEach(rowData => {
-                            const row = purchaseTableBody.insertRow();
-                            let purchaseAmount = 0;
-                            const purchaseType = rowData[10]; 
-                            switch (purchaseType) {
-                                case 'Purchase': purchaseAmount = rowData[9]; break;
-                                case 'Expenses': purchaseAmount = rowData[7]; break;
-                                case 'Fixed assets': purchaseAmount = rowData[8]; break;
-                                case 'Non vat': purchaseAmount = rowData[6]; break;
-                            }
-                            row.insertCell().textContent = rowData[0]; // SN
-                            row.insertCell().textContent = rowData[1]; // Bill No
-                            row.insertCell().textContent = formatDateToYYYYMMDD(rowData[2]); // Date (AD)
-                            row.insertCell().textContent = rowData[3]; // Date (BS)
-                            row.insertCell().textContent = rowData[4]; // Supplier Name
-                            row.insertCell().textContent = rowData[10]; // Purchase Type
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(purchaseAmount); // Purchase Amount
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[12]); // VAT
-                            row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[13]); // Total
-                            
-                            const actionCell = row.insertCell();
-                            actionCell.style.textAlign = 'center';
-                            actionCell.innerHTML = `<button class="edit-button"><i data-lucide="edit-2"></i>Edit</button>`;
-                            const editButton = actionCell.querySelector('.edit-button');
-                            lucide.createIcons({ nodes: [editButton.querySelector('svg')] });
-
-                            editButton.addEventListener('click', () => {
-                                confirmEditPurchaseRecord(rowData);
-                            });
-                        });
-                        
-                        viewMorePurchaseContainer.style.display = "block";
-                        viewMorePurchaseBtn.textContent = "View More Results";
-                        viewMorePurchaseBtn.disabled = false;
-                        viewMorePurchaseBtn.style.display = (records.length < count) ? 'none' : 'inline-block';
-                    })
-                    .withFailureHandler(function(error) {
-                        console.error("Error loading purchase records:", error);
-                        purchaseTableBody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Error loading records: ${error.message}</td></tr>`;
-                        viewMorePurchaseBtn.textContent = "View More Results";
-                        viewMorePurchaseBtn.disabled = false;
-                    })
-                    .getRecentPurchaseRecords(count);
-            }
-            
-            document.getElementById('viewMorePurchaseBtn').addEventListener('click', function() {
-                purchaseRecordsToShow += 5;
-                loadPurchaseRecords(purchaseRecordsToShow);
-            });
-
-            function confirmEditPurchaseRecord(rowData) {
-                const billNo = rowData[1];
-                const message = `Do you want to edit purchase voucher no ${billNo}?`;
-
-                displayConfirmBox(message, () => {
-                    editPurchaseRecord(rowData);
+                choicesInstance = new Choices(select, {
+                    searchEnabled: true,
+                    itemSelectText: "",
+                    shouldSort: false
                 });
-            }
 
-            async function editPurchaseRecord(rowData) {
-                await openPurchaseModal(true);
-                const [sn, billNo, dateAD, dateBS, supplierName, panNumber, nonVat, expenses, fixedAssets, purchase, purchaseType, totalTaxable, vat, total] = rowData;
+                select.addEventListener("change", function() {
+                    document.getElementById("panNumber").value = clientMap[this.value] || "";
+                });
+                resolve();
 
-                let amount = 0;
-                switch (purchaseType) {
-                    case "Non vat": amount = nonVat; break;
-                    case "Expenses": amount = expenses; break;
-                    case "Fixed assets": amount = fixedAssets; break;
-                    case "Purchase": amount = purchase; break;
-                }
+            }).withFailureHandler(reject).getClientList();
+        });
+    }
 
-                purchaseSnInput.value = sn;
-                purchaseBillNumberInput.value = billNo;
-                purchaseDateADInput.value = formatDateToYYYYMMDD(dateAD);
-                purchaseDateBSInput.value = dateBS;
-                purchaseTypeSelect.value = purchaseType;
+    // --- Purchase Form Logic ---
+    function updatePurchaseVAT() {
+        let rawValue = purchaseAmountInput.value.replace(/,/g, "");
+        let amount = parseFloat(rawValue);
 
-                if (purchaseChoicesInstance) {
-                    purchaseChoicesInstance.setChoiceByValue(String(supplierName || "").trim());
-                }
-
-                supplierPanNumberInput.value = panNumber || ""; 
-
-                purchaseAmountInput.value = formatNumber(amount);
+        const selectedPurchaseType = purchaseTypeSelect.value;
+        if (!isNaN(amount)) {
+            if (selectedPurchaseType === "Non vat") {
+                purchaseVatAmountInput.value = formatNumber(0);
+                purchaseTotalInput.value = formatNumber(amount);
+            } else {
+                let vat = amount * 0.13;
+                let total = amount + vat;
                 purchaseVatAmountInput.value = formatNumber(vat);
                 purchaseTotalInput.value = formatNumber(total);
             }
+        } else {
+            purchaseVatAmountInput.value = "";
+            purchaseTotalInput.value = "";
+            if (rawValue === "") {
+                purchaseAmountInput.value = "";
+            }
+        }
+    }
+    purchaseAmountInput.addEventListener("input", updatePurchaseVAT);
+    purchaseAmountInput.addEventListener("blur", function() {
+        let rawValue = this.value.replace(/,/g, "");
+        let amount = parseFloat(rawValue);
+        if (!isNaN(amount) && rawValue !== "") {
+            this.value = formatNumber(amount);
+        } else if (rawValue === "") {
+            this.value = "";
+        }
+    });
+    purchaseTypeSelect.addEventListener("change", updatePurchaseVAT);
 
-            purchaseForm.addEventListener("submit", function (e) {
-                e.preventDefault();
-                savePurchaseBtn.disabled = true;
+    function loadNextPurchaseSN() {
+        google.script.run.withSuccessHandler(sn => {
+            purchaseSnInput.value = sn;
+        }).getNextPurchaseSN();
+    }
 
-                const isUpdate = document.getElementById("isPurchaseEditMode").value === 'true';
-                savePurchaseBtn.textContent = isUpdate ? "Updating..." : "Saving...";
-                purchaseStatusMsg.style.display = "none";
-
-                const data = {
-                    sn: purchaseSnInput.value,
-                    billNumber: purchaseBillNumberInput.value,
-                    dateAD: purchaseDateADInput.value,
-                    dateBS: purchaseDateBSInput.value,
-                    supplierName: supplierNameSelect.value,
-                    supplierPanNumber: supplierPanNumberInput.value,
-                    purchaseType: purchaseTypeSelect.value,
-                    purchaseAmount: purchaseAmountInput.value.replace(/,/g, ""),
-                    vatAmount: purchaseVatAmountInput.value.replace(/,/g, ""),
-                    total: purchaseTotalInput.value.replace(/,/g, "")
-                };
-
-                function resetSaveButton() {
-                    savePurchaseBtn.disabled = false;
-                    savePurchaseBtn.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save';
-                }
-
-                const successCallback = () => {
-                    if (isUpdate) {
-                        displayMessageBox("✅ Updated successfully", 'info');
-                        setTimeout(() => {
-                            closePurchaseModal();
-                            loadPurchaseRecords(purchaseRecordsToShow);
-                            loadDashboardSummary();
-                        }, 1500);
-                    } else {
-                        purchaseForm.reset();
-                        purchaseVatAmountInput.value = "";
-                        purchaseTotalInput.value = "";
-                        purchaseAmountInput.value = "";
-                        supplierPanNumberInput.value = "";
-                        purchaseStatusMsg.textContent = "✅ Saved successfully";
-                        purchaseStatusMsg.style.display = "block";
-                        loadNextPurchaseSN();
-                        if (purchaseChoicesInstance) purchaseChoicesInstance.destroy();
-                        loadSuppliers();
-                        purchaseAdConversionStatus.style.display = "none";
-                        purchaseBsConversionStatus.style.display = "none";
-                        if (document.getElementById("purchaseTableContainer").style.display === "block") {
-                            loadPurchaseRecords(purchaseRecordsToShow);
-                        }
-                        loadDashboardSummary();
+    function loadSuppliers() {
+        return new Promise((resolve, reject) => {
+            google.script.run
+                .withSuccessHandler(function(supplierData) {
+                    const select = document.getElementById("supplierName");
+                    if (purchaseChoicesInstance) {
+                        purchaseChoicesInstance.destroy();
                     }
-                    resetSaveButton();
-                };
+                    select.innerHTML = "";
+                    supplierMap = {};
+                    select.appendChild(new Option("-- Select Supplier --", ""));
+                    supplierData.forEach(function([name, pan]) {
+                        if (name && pan) {
+                            select.appendChild(new Option(name, name));
+                            supplierMap[name] = pan;
+                        }
+                    });
+                    purchaseChoicesInstance = new Choices(select, {
+                        searchEnabled: true,
+                        itemSelectText: "",
+                        shouldSort: false,
+                    });
+                    select.addEventListener("change", function() {
+                        supplierPanNumberInput.value = supplierMap[this.value] || "";
+                    });
+                    resolve();
+                })
+                .withFailureHandler(reject)
+                .getClientList();
+        });
+    }
 
-                const failureCallback = (err) => {
-                    const action = isUpdate ? "update" : "save";
-                    displayMessageBox(`❌ Couldn't ${action} data: ${err.message}`, "error");
-                    resetSaveButton();
-                };
-                
-                if (isUpdate) {
-                    google.script.run
-                        .withSuccessHandler(successCallback)
-                        .withFailureHandler(failureCallback)
-                        .updatePurchaseEntry(data);
-                } else {
-                    google.script.run
-                        .withSuccessHandler(successCallback)
-                        .withFailureHandler(failureCallback)
-                        .submitPurchaseEntry(data);
+    // --- Purchase Table Logic ---
+    window.toggleViewPurchaseTable = function() {
+        const purchaseTableContainer = document.getElementById("purchaseTableContainer");
+        const viewPurchasesShortcut = document.getElementById("viewPurchasesShortcut");
+        const isVisible = purchaseTableContainer.style.display === "block";
+
+        if (!isVisible) {
+            purchaseRecordsToShow = 10;
+            purchaseTableContainer.style.display = "block";
+            viewPurchasesShortcut.querySelector("span").textContent = "Hide Purchases";
+            loadPurchaseRecords(purchaseRecordsToShow);
+        } else {
+            purchaseTableContainer.style.display = "none";
+            document.getElementById("viewMorePurchaseContainer").style.display = "none";
+            viewPurchasesShortcut.querySelector("span").textContent = "View Purchases";
+            document.getElementById("purchaseTableBody").innerHTML = '';
+        }
+    }
+
+    function loadPurchaseRecords(count) {
+        const purchaseTableBody = document.getElementById("purchaseTableBody");
+        const viewMorePurchaseBtn = document.getElementById("viewMorePurchaseBtn");
+        const viewMorePurchaseContainer = document.getElementById("viewMorePurchaseContainer");
+
+        if (count <= 10) {
+            purchaseTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">Loading recent purchase records...</td></tr>`;
+        }
+        viewMorePurchaseBtn.textContent = "Loading...";
+        viewMorePurchaseBtn.disabled = true;
+
+        google.script.run
+            .withSuccessHandler(function(records) {
+                if (count <= 10) purchaseTableBody.innerHTML = '';
+
+                if (!records || records.length === 0) {
+                    purchaseTableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No recent purchase records found.</td></tr>`;
+                    viewMorePurchaseContainer.style.display = "none";
+                    return;
                 }
-            });
 
-            window.openPurchaseModal = async function(isEdit = false) {
-                document.getElementById("isPurchaseEditMode").value = isEdit;
-                purchaseModal.style.display = "flex";
+                records.forEach(rowData => {
+                    const row = purchaseTableBody.insertRow();
+                    let purchaseAmount = 0;
+                    const purchaseType = rowData[10];
+                    switch (purchaseType) {
+                        case 'Purchase':
+                            purchaseAmount = rowData[9];
+                            break;
+                        case 'Expenses':
+                            purchaseAmount = rowData[7];
+                            break;
+                        case 'Fixed assets':
+                            purchaseAmount = rowData[8];
+                            break;
+                        case 'Non vat':
+                            purchaseAmount = rowData[6];
+                            break;
+                    }
+                    row.insertCell().textContent = rowData[0]; // SN
+                    row.insertCell().textContent = rowData[1]; // Bill No
+                    row.insertCell().textContent = formatDateToYYYYMMDD(rowData[2]); // Date (AD)
+                    row.insertCell().textContent = rowData[3]; // Date (BS)
+                    row.insertCell().textContent = rowData[4]; // Supplier Name
+                    row.insertCell().textContent = rowData[10]; // Purchase Type
+                    row.insertCell().textContent = 'Rs. ' + formatNumber(purchaseAmount); // Purchase Amount
+                    row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[12]); // VAT
+                    row.insertCell().textContent = 'Rs. ' + formatNumber(rowData[13]); // Total
 
-                if (!isEdit) {
-                    purchaseForm.reset();
-                    loadNextPurchaseSN();
-                    purchaseAmountInput.value = '';
-                    purchaseVatAmountInput.value = '';
-                    purchaseTotalInput.value = '';
-                    purchaseTypeSelect.value = '';
-                    supplierPanNumberInput.value = '';
-                }
+                    const actionCell = row.insertCell();
+                    actionCell.style.textAlign = 'center';
+                    actionCell.innerHTML = `<button class="edit-button"><i data-lucide="edit-2"></i>Edit</button>`;
+                    const editButton = actionCell.querySelector('.edit-button');
+                    lucide.createIcons({
+                        nodes: [editButton.querySelector('svg')]
+                    });
 
-                savePurchaseBtn.textContent = isEdit ? "🔄 Update & Save" : "💾 Save";
+                    editButton.addEventListener('click', () => {
+                        confirmEditPurchaseRecord(rowData);
+                    });
+                });
+
+                viewMorePurchaseContainer.style.display = "block";
+                viewMorePurchaseBtn.textContent = "View More Results";
+                viewMorePurchaseBtn.disabled = false;
+                viewMorePurchaseBtn.style.display = (records.length < count) ? 'none' : 'inline-block';
+            })
+            .withFailureHandler(function(error) {
+                console.error("Error loading purchase records:", error);
+                purchaseTableBody.innerHTML = `<tr><td colspan="10" style="color:red; text-align:center;">Error loading records: ${error.message}</td></tr>`;
+                viewMorePurchaseBtn.textContent = "View More Results";
+                viewMorePurchaseBtn.disabled = false;
+            })
+            .getRecentPurchaseRecords(count);
+    }
+
+    document.getElementById('viewMorePurchaseBtn').addEventListener('click', function() {
+        purchaseRecordsToShow += 5;
+        loadPurchaseRecords(purchaseRecordsToShow);
+    });
+
+    function confirmEditPurchaseRecord(rowData) {
+        const billNo = rowData[1];
+        const message = `Do you want to edit purchase voucher no ${billNo}?`;
+
+        displayConfirmBox(message, () => {
+            editPurchaseRecord(rowData);
+        });
+    }
+
+    async function editPurchaseRecord(rowData) {
+        await openPurchaseModal(true);
+        const [sn, billNo, dateAD, dateBS, supplierName, panNumber, nonVat, expenses, fixedAssets, purchase, purchaseType, totalTaxable, vat, total] = rowData;
+
+        let amount = 0;
+        switch (purchaseType) {
+            case "Non vat":
+                amount = nonVat;
+                break;
+            case "Expenses":
+                amount = expenses;
+                break;
+            case "Fixed assets":
+                amount = fixedAssets;
+                break;
+            case "Purchase":
+                amount = purchase;
+                break;
+        }
+
+        purchaseSnInput.value = sn;
+        purchaseBillNumberInput.value = billNo;
+        purchaseDateADInput.value = formatDateToYYYYMMDD(dateAD);
+        purchaseDateBSInput.value = dateBS;
+        purchaseTypeSelect.value = purchaseType;
+
+        if (purchaseChoicesInstance) {
+            purchaseChoicesInstance.setChoiceByValue(String(supplierName || "").trim());
+        }
+
+        supplierPanNumberInput.value = panNumber || "";
+
+        purchaseAmountInput.value = formatNumber(amount);
+        purchaseVatAmountInput.value = formatNumber(vat);
+        purchaseTotalInput.value = formatNumber(total);
+    }
+
+    purchaseForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        savePurchaseBtn.disabled = true;
+
+        const isUpdate = document.getElementById("isPurchaseEditMode").value === 'true';
+        savePurchaseBtn.textContent = isUpdate ? "Updating..." : "Saving...";
+        purchaseStatusMsg.style.display = "none";
+
+        const data = {
+            sn: purchaseSnInput.value,
+            billNumber: purchaseBillNumberInput.value,
+            dateAD: purchaseDateADInput.value,
+            dateBS: purchaseDateBSInput.value,
+            supplierName: supplierNameSelect.value,
+            supplierPanNumber: supplierPanNumberInput.value,
+            purchaseType: purchaseTypeSelect.value,
+            purchaseAmount: purchaseAmountInput.value.replace(/,/g, ""),
+            vatAmount: purchaseVatAmountInput.value.replace(/,/g, ""),
+            total: purchaseTotalInput.value.replace(/,/g, "")
+        };
+
+        function resetSaveButton() {
+            savePurchaseBtn.disabled = false;
+            savePurchaseBtn.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save';
+        }
+
+        const successCallback = () => {
+            if (isUpdate) {
+                displayMessageBox("✅ Updated successfully", 'info');
+                setTimeout(() => {
+                    closePurchaseModal();
+                    loadPurchaseRecords(purchaseRecordsToShow);
+                    loadDashboardSummary();
+                }, 1500);
+            } else {
+                purchaseForm.reset();
+                purchaseVatAmountInput.value = "";
+                purchaseTotalInput.value = "";
+                purchaseAmountInput.value = "";
+                supplierPanNumberInput.value = "";
+                purchaseStatusMsg.textContent = "✅ Saved successfully";
+                purchaseStatusMsg.style.display = "block";
+                loadNextPurchaseSN();
+                if (purchaseChoicesInstance) purchaseChoicesInstance.destroy();
+                loadSuppliers();
                 purchaseAdConversionStatus.style.display = "none";
                 purchaseBsConversionStatus.style.display = "none";
-
-                await loadSuppliers();
-            };
-
-            window.closePurchaseModal = function () {
-                purchaseModal.style.display = "none";
-                purchaseStatusMsg.style.display = "none";
-                purchaseForm.reset();
-                document.getElementById("isPurchaseEditMode").value = 'false';
-                if (purchaseChoicesInstance) {
-                    purchaseChoicesInstance.destroy();
+                if (document.getElementById("purchaseTableContainer").style.display === "block") {
+                    loadPurchaseRecords(purchaseRecordsToShow);
                 }
-            };
+                loadDashboardSummary();
+            }
+            resetSaveButton();
+        };
 
-            purchaseDateADInput.addEventListener("change", function() {
-                const adDate = this.value;
-                if (adDate) {
-                    purchaseBsConversionStatus.style.display = "block";
-                    purchaseBsConversionStatus.textContent = "Converting date...";
-                    purchaseBsConversionStatus.classList.remove("error");
-                    google.script.run
-                        .withSuccessHandler(bsDate => {
-                            if (bsDate) {
-                                purchaseDateBSInput.value = bsDate;
-                                purchaseBsConversionStatus.style.display = "none";
-                            } else {
-                                purchaseBsConversionStatus.value = "";
-                                purchaseBsConversionStatus.textContent = "Date not found in ADTOBS.";
-                                purchaseBsConversionStatus.classList.add("error");
-                            }
-                        })
-                        .withFailureHandler(err => {
-                            purchaseDateBSInput.value = "";
-                            purchaseBsConversionStatus.textContent = "Error converting: " + err.message;
-                            purchaseBsConversionStatus.classList.add("error");
-                        })
-                        .convertADtoBS(adDate);
-                } else {
+        const failureCallback = (err) => {
+            const action = isUpdate ? "update" : "save";
+            displayMessageBox(`❌ Couldn't ${action} data: ${err.message}`, "error");
+            resetSaveButton();
+        };
+
+        if (isUpdate) {
+            google.script.run
+                .withSuccessHandler(successCallback)
+                .withFailureHandler(failureCallback)
+                .updatePurchaseEntry(data);
+        } else {
+            google.script.run
+                .withSuccessHandler(successCallback)
+                .withFailureHandler(failureCallback)
+                .submitPurchaseEntry(data);
+        }
+    });
+
+    window.openPurchaseModal = async function(isEdit = false) {
+        document.getElementById("isPurchaseEditMode").value = isEdit;
+        purchaseModal.style.display = "flex";
+
+        if (!isEdit) {
+            purchaseForm.reset();
+            loadNextPurchaseSN();
+            purchaseAmountInput.value = '';
+            purchaseVatAmountInput.value = '';
+            purchaseTotalInput.value = '';
+            purchaseTypeSelect.value = '';
+            supplierPanNumberInput.value = '';
+        }
+
+        savePurchaseBtn.textContent = isEdit ? "🔄 Update & Save" : "💾 Save";
+        purchaseAdConversionStatus.style.display = "none";
+        purchaseBsConversionStatus.style.display = "none";
+
+        await loadSuppliers();
+    };
+
+    window.closePurchaseModal = function() {
+        purchaseModal.style.display = "none";
+        purchaseStatusMsg.style.display = "none";
+        purchaseForm.reset();
+        document.getElementById("isPurchaseEditMode").value = 'false';
+        if (purchaseChoicesInstance) {
+            purchaseChoicesInstance.destroy();
+        }
+    };
+
+    purchaseDateADInput.addEventListener("change", function() {
+        const adDate = this.value;
+        if (adDate) {
+            purchaseBsConversionStatus.style.display = "block";
+            purchaseBsConversionStatus.textContent = "Converting date...";
+            purchaseBsConversionStatus.classList.remove("error");
+            google.script.run
+                .withSuccessHandler(bsDate => {
+                    if (bsDate) {
+                        purchaseDateBSInput.value = bsDate;
+                        purchaseBsConversionStatus.style.display = "none";
+                    } else {
+                        purchaseBsConversionStatus.value = "";
+                        purchaseBsConversionStatus.textContent = "Date not found in ADTOBS.";
+                        purchaseBsConversionStatus.classList.add("error");
+                    }
+                })
+                .withFailureHandler(err => {
                     purchaseDateBSInput.value = "";
-                    purchaseBsConversionStatus.style.display = "none";
-                }
-            });
+                    purchaseBsConversionStatus.textContent = "Error converting: " + err.message;
+                    purchaseBsConversionStatus.classList.add("error");
+                })
+                .convertADtoBS(adDate);
+        } else {
+            purchaseDateBSInput.value = "";
+            purchaseBsConversionStatus.style.display = "none";
+        }
+    });
 
-            purchaseDateBSInput.addEventListener("change", function() {
-                const bsDate = this.value;
-                const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-                if (bsDate && datePattern.test(bsDate)) {
-                    purchaseAdConversionStatus.style.display = "block";
-                    purchaseAdConversionStatus.textContent = "Converting date...";
-                    purchaseAdConversionStatus.classList.remove("error");
-                    google.script.run
-                        .withSuccessHandler(adDate => {
-                            if (adDate) {
-                                purchaseDateADInput.value = adDate;
-                                purchaseAdConversionStatus.style.display = "none";
-                            } else {
-                                purchaseAdConversionStatus.textContent = "Date not found in ADTOBS.";
-                                adConversionStatus.classList.add("error");
-                            }
-                        })
-                        .withFailureHandler(err => {
-                            purchaseDateADInput.value = "";
-                            purchaseAdConversionStatus.textContent = "Error converting: " + err.message;
-                            purchaseAdConversionStatus.classList.add("error");
-                        })
-                        .convertBStoAD(bsDate);
-                } else {
+    purchaseDateBSInput.addEventListener("change", function() {
+        const bsDate = this.value;
+        const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+        if (bsDate && datePattern.test(bsDate)) {
+            purchaseAdConversionStatus.style.display = "block";
+            purchaseAdConversionStatus.textContent = "Converting date...";
+            purchaseAdConversionStatus.classList.remove("error");
+            google.script.run
+                .withSuccessHandler(adDate => {
+                    if (adDate) {
+                        purchaseDateADInput.value = adDate;
+                        purchaseAdConversionStatus.style.display = "none";
+                    } else {
+                        purchaseAdConversionStatus.textContent = "Date not found in ADTOBS.";
+                        adConversionStatus.classList.add("error");
+                    }
+                })
+                .withFailureHandler(err => {
                     purchaseDateADInput.value = "";
-                    purchaseAdConversionStatus.style.display = "none";
-                    if (bsDate && !datePattern.test(bsDate)) {
-                        purchaseAdConversionStatus.style.display = "block";
-                        purchaseAdConversionStatus.textContent = "Invalid format. Use YYYY-MM-DD.";
-                        purchaseAdConversionStatus.classList.add("error");
+                    purchaseAdConversionStatus.textContent = "Error converting: " + err.message;
+                    purchaseAdConversionStatus.classList.add("error");
+                })
+                .convertBStoAD(bsDate);
+        } else {
+            purchaseDateADInput.value = "";
+            purchaseAdConversionStatus.style.display = "none";
+            if (bsDate && !datePattern.test(bsDate)) {
+                purchaseAdConversionStatus.style.display = "block";
+                purchaseAdConversionStatus.textContent = "Invalid format. Use YYYY-MM-DD.";
+                purchaseAdConversionStatus.classList.add("error");
+            }
+        }
+    });
+
+    // --- VAT Entry Form Logic ---
+    function loadNextVatSN() {
+        google.script.run.withSuccessHandler(sn => {
+            if (vatSnInput) vatSnInput.value = sn;
+        }).getNextVatSN();
+    }
+
+    if (vatPanNumberInput) {
+        vatPanNumberInput.addEventListener("input", function() {
+            const pan = this.value.trim();
+            if (pan.length === 9 && !isNaN(pan)) {
+                panCheckStatus.style.display = "block";
+                panCheckStatus.textContent = "Checking PAN...";
+                panCheckStatus.classList.remove("error");
+                google.script.run
+                    .withSuccessHandler(name => {
+                        if (name) {
+                            vatNameInput.value = name;
+                            vatNameInput.readOnly = true;
+                            panCheckStatus.style.display = "none";
+                        } else {
+                            vatNameInput.value = "";
+                            vatNameInput.readOnly = false;
+                            panCheckStatus.textContent = "PAN not found. Enter name manually.";
+                            panCheckStatus.classList.remove("error");
+                        }
+                    })
+                    .withFailureHandler(err => {
+                        console.error("Error checking PAN:", err);
+                        vatNameInput.value = "";
+                        vatNameInput.readOnly = false;
+                        panCheckStatus.textContent = "Error checking PAN: " + err.message;
+                        panCheckStatus.classList.add("error");
+                    })
+                    .getClientNameByPan(pan);
+            } else {
+                vatNameInput.value = "";
+                vatNameInput.readOnly = false;
+                panCheckStatus.style.display = "none";
+            }
+        });
+    }
+
+    if (vatForm) {
+        vatForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            saveVatButton.disabled = true;
+            const isUpdate = document.getElementById("isVatEditMode").value === 'true';
+            saveVatButton.textContent = isUpdate ? "Updating..." : "Saving...";
+            vatStatusMsg.style.display = "none";
+
+            const data = {
+                sn: vatSnInput.value,
+                panNumber: vatPanNumberInput.value,
+                name: vatNameInput.value
+            };
+
+            if (!data.panNumber || data.panNumber.length !== 9 || isNaN(data.panNumber)) {
+                displayMessageBox("❌ Please enter a valid 9-digit PAN number.", "error");
+                saveVatButton.disabled = false;
+                saveVatButton.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save Data';
+                return;
+            }
+            if (!data.name) {
+                displayMessageBox("❌ Please enter a Name for the PAN entry.", "error");
+                saveVatButton.disabled = false;
+                saveVatButton.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save Data';
+                return;
+            }
+
+            function resetSaveButton() {
+                saveVatButton.disabled = false;
+                saveVatButton.textContent = isUpdate ? '🔄 Update & Save' : '💾 Save Data';
+            }
+
+            const successCallback = () => {
+                if (isUpdate) {
+                    displayMessageBox("✅ Updated successfully", 'info');
+                    setTimeout(() => {
+                        closeVatModal();
+                        loadVatRecords(vatRecordsToShow);
+                    }, 1500);
+                } else {
+                    vatForm.reset();
+                    vatNameInput.readOnly = false;
+                    vatStatusMsg.textContent = "✅ VAT entry saved!";
+                    vatStatusMsg.style.display = "block";
+                    loadNextVatSN();
+                    panCheckStatus.style.display = "none";
+                    if (vatTableContainer.style.display === "block") {
+                        loadVatRecords(vatRecordsToShow);
                     }
                 }
-            });
-
-            function openNewVatModal() {
-                alert("The 'New VAT Entry' feature has not been fully implemented yet.");
-            }
-
-            // Global click handler for modals and message box
-            window.onclick = function (event) {
-                const msgBox = document.getElementById("messageBox");
-                if (event.target === salesModal) closeSalesModal();
-                if (event.target === purchaseModal) closePurchaseModal();
-                if (msgBox && event.target === msgBox && !event.target.closest('.message-box-confirm .content')) {
-                    msgBox.remove();
-                }
+                resetSaveButton();
             };
 
-            function displayMessageBox(message, type = "info") {
-                let messageBox = document.getElementById("messageBox");
-                if (messageBox) messageBox.remove();
-                
-                messageBox = document.createElement("div");
-                messageBox.id = "messageBox";
-                messageBox.style.cssText = `
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                    background-color: rgba(0,0,0,0.4); z-index: 1001;
-                    display: flex; align-items: center; justify-content: center;
-                `;
+            const failureCallback = (err) => {
+                const action = isUpdate ? "update" : "save";
+                displayMessageBox(`❌ Couldn't ${action} VAT data: ${err.message}`, "error");
+                resetSaveButton();
+            };
 
-                const content = document.createElement('div');
-                content.style.cssText = `
-                    background-color: white; padding: 25px 35px; border-radius: 10px;
-                    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                    display: flex; flex-direction: column; align-items: center;
-                    max-width: 400px; text-align: center;
-                `;
-                
-                content.innerHTML = `
-                    <p style="margin: 0 0 20px 0; font-size: 16px; color: ${type === 'error' ? '#dc2626' : '#1e3a8a'}; font-weight: 600;">${message}</p>
-                    <button style="
-                        padding: 10px 25px; background-color: #2563eb; color: white;
-                        border: none; border-radius: 5px; cursor: pointer; font-size: 14px;
-                    ">OK</button>
-                `;
-                
-                content.querySelector('button').onclick = () => messageBox.remove();
-                messageBox.appendChild(content);
-                document.body.appendChild(messageBox);
+            if (isUpdate) {
+                google.script.run
+                    .withSuccessHandler(successCallback)
+                    .withFailureHandler(failureCallback)
+                    .updateVatEntry(data);
+            } else {
+                google.script.run
+                    .withSuccessHandler(successCallback)
+                    .withFailureHandler(failureCallback)
+                    .submitVatEntry(data);
             }
-
-            function displayConfirmBox(message, onConfirm, onCancel) {
-                let messageBox = document.getElementById("messageBox");
-                if (messageBox) messageBox.remove(); 
-
-                messageBox = document.createElement("div");
-                messageBox.id = "messageBox";
-                messageBox.classList.add("message-box-confirm"); 
-                messageBox.style.cssText = `
-                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                    background-color: rgba(0,0,0,0.4); z-index: 1001;
-                    display: flex; align-items: center; justify-content: center;
-                `;
-
-                const content = document.createElement('div');
-                content.classList.add("content");
-                
-                content.innerHTML = `
-                    <p>${message}</p>
-                    <div class="button-group">
-                        <button class="yes-button">Yes</button>
-                        <button class="no-button">No</button>
-                    </div>
-                `;
-                
-                content.querySelector('.yes-button').onclick = () => {
-                    messageBox.remove();
-                    if (onConfirm) onConfirm();
-                };
-                content.querySelector('.no-button').onclick = () => {
-                    messageBox.remove();
-                    if (onCancel) onCancel();
-                };
-
-                messageBox.appendChild(content);
-                document.body.appendChild(messageBox);
-            }
-            
-            // Initial Load
-            loadDashboardSummary();
-
         });
-function getNextVatSn() {
-  if (!VAT_NO_SPREADSHEET_ID) {
-    throw new Error("VAT_NO_SPREADSHEET_ID is not configured. Please update code.gs with your VAT NO Spreadsheet ID.");
-  }
-  
-  try {
-    const externalSs = SpreadsheetApp.openById(VAT_NO_SPREADSHEET_ID);
-    const vatSheet = externalSs.getSheetByName("database");
-    
-    if (!vatSheet) {
-      Logger.log("Error: 'database' sheet not found in external 'VAT NO' spreadsheet for SN generation.");
-      throw new Error("The 'database' sheet was not found in the external 'VAT NO' spreadsheet. Please ensure it exists and is correctly named.");
-    }
-    
-    const lastRow = vatSheet.getLastRow();
-    if (lastRow < 2) return 1; // If only headers exist, start with 1
-    
-    const lastSN = vatSheet.getRange(lastRow, 1).getValue();
-    return (Number(lastSN) || 0) + 1;
-    
-  } catch (error) {
-    Logger.log("Error accessing VAT spreadsheet: " + error.message);
-    throw new Error("Cannot access VAT spreadsheet. Please check the spreadsheet ID and permissions.");
-  }
-}
-
-/**
- * Enhanced submitVatEntry function with better error handling
- * @param {Object} data - The VAT entry data object from the client-side.
- */
-
-    let panDebounceTimeout;
-    function handlePanInput(pan) {
-      clearTimeout(panDebounceTimeout);
-      panDebounceTimeout = setTimeout(() => {
-          if (pan && pan.length >= 9) { 
-            google.script.run.withSuccessHandler(function(name) {
-              const nameField = document.getElementById('name');
-              if (name && nameField) {
-                nameField.value = name;
-              }
-            }).getClientNameByPan(pan);
-          }
-      }, 300); // Debounce to avoid too many calls
     }
 
-    function submitVatForm(e) {
-      e.preventDefault();
-      const messageDiv = document.getElementById('vat-message');
-      messageDiv.textContent = 'Submitting...';
-      
-      const data = {
-        sn: document.getElementById('sn').value,
-        panNumber: document.getElementById('pan').value,
-        name: document.getElementById('name').value,
-      };
 
-      google.script.run.withSuccessHandler(function(response) {
-        messageDiv.textContent = response.message;
-        messageDiv.style.color = response.success ? 'green' : 'red';
-        
-        if(response.success) {
-          document.getElementById('pan').value = '';
-          document.getElementById('name').value = '';
-          document.getElementById('pan').focus();
-          getNextVatSn(); // Refresh S.N. for the next entry
+    window.openVatModal = function(isEdit = false) {
+        document.getElementById("isVatEditMode").value = isEdit;
+        vatModal.style.display = "flex";
+        saveVatButton.textContent = isEdit ? '🔄 Update & Save' : '💾 Save Data';
+
+        if (!isEdit) {
+            vatForm.reset();
+            loadNextVatSN();
+            vatNameInput.readOnly = false;
+            panCheckStatus.style.display = "none";
+            vatStatusMsg.style.display = "none";
         }
-      }).submitVatEntry(data);
+    };
+
+    window.closeVatModal = function() {
+        vatModal.style.display = "none";
+        vatForm.reset();
+        document.getElementById("isVatEditMode").value = 'false';
+        vatNameInput.readOnly = false;
+        panCheckStatus.style.display = "none";
+        vatStatusMsg.style.display = "none";
+    };
+
+    // VAT Table Logic
+    window.toggleViewVatTable = function() {
+        const viewVatShortcut = document.getElementById("viewVatShortcut");
+        const isVisible = vatTableContainer.style.display === "block";
+
+        if (!isVisible) {
+            vatRecordsToShow = 10;
+            vatTableContainer.style.display = "block";
+            viewVatShortcut.querySelector("span").textContent = "Hide VAT";
+            loadVatRecords(vatRecordsToShow);
+        } else {
+            vatTableContainer.style.display = "none";
+            viewMoreVatContainer.style.display = "none";
+            viewVatShortcut.querySelector("span").textContent = "View VAT";
+            vatTableBody.innerHTML = '';
+        }
     }
 
-    // --- Initialization ---
-    const vatForm = document.getElementById('vat-form');
-    if (vatForm) {
-        vatForm.addEventListener('submit', submitVatForm);
-    }
-    getNextVatSn();
+    function loadVatRecords(count) {
+        if (count <= 10) {
+            vatTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">Loading recent VAT records...</td></tr>`;
+        }
+        viewMoreVatBtn.textContent = "Loading...";
+        viewMoreVatBtn.disabled = true;
 
-    </script>
+        google.script.run
+            .withSuccessHandler(function(records) {
+                if (count <= 10) vatTableBody.innerHTML = '';
+
+                if (!records || records.length === 0) {
+                    vatTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No recent VAT records found.</td></tr>`;
+                    viewMoreVatContainer.style.display = "none";
+                    return;
+                }
+
+                records.forEach(rowData => {
+                    const row = vatTableBody.insertRow();
+                    row.insertCell().textContent = rowData[0]; // SN
+                    row.insertCell().textContent = rowData[1]; // PAN Number
+                    row.insertCell().textContent = rowData[2]; // Name
+
+                    const actionCell = row.insertCell();
+                    actionCell.style.textAlign = 'center';
+                    actionCell.innerHTML = `<button class="edit-button"><i data-lucide="edit-2"></i>Edit</button>`;
+                    const editButton = actionCell.querySelector('.edit-button');
+                    lucide.createIcons({
+                        nodes: [editButton.querySelector('svg')]
+                    });
+
+                    editButton.addEventListener('click', () => {
+                        confirmEditVatRecord(rowData);
+                    });
+                });
+
+                viewMoreVatContainer.style.display = "block";
+                viewMoreVatBtn.textContent = "View More Results";
+                viewMoreVatBtn.disabled = false;
+                viewMoreVatBtn.style.display = (records.length < count) ? 'none' : 'inline-block';
+            })
+            .withFailureHandler(function(error) {
+                console.error("Error loading VAT records:", error);
+                vatTableBody.innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Error loading records: ${error.message}</td></tr>`;
+                viewMoreVatBtn.textContent = "View More Results";
+                viewMoreVatBtn.disabled = false;
+            })
+            .getRecentVatRecords(count);
+    }
+
+    if (viewMoreVatBtn) {
+        viewMoreVatBtn.addEventListener('click', function() {
+            vatRecordsToShow += 5;
+            loadVatRecords(vatRecordsToShow);
+        });
+    }
+
+
+    function confirmEditVatRecord(rowData) {
+        const pan = rowData[1];
+        const message = `Do you want to edit the entry for PAN ${pan}?`;
+
+        displayConfirmBox(message, () => {
+            editVatRecord(rowData);
+        });
+    }
+
+    function editVatRecord(rowData) {
+        const [sn, panNumber, name] = rowData;
+        openVatModal(true);
+        vatSnInput.value = sn;
+        vatPanNumberInput.value = panNumber;
+        vatNameInput.value = name;
+    }
+
+
+    // Global click handler for modals and message box
+    window.onclick = function(event) {
+        const msgBox = document.getElementById("messageBox");
+        if (event.target === salesModal) closeSalesModal();
+        if (event.target === purchaseModal) closePurchaseModal();
+        if (event.target === vatModal) closeVatModal();
+        if (msgBox && event.target === msgBox && !event.target.closest('.message-box-confirm .content')) {
+            msgBox.remove();
+        }
+    };
+
+    function displayMessageBox(message, type = "info") {
+        let messageBox = document.getElementById("messageBox");
+        if (messageBox) messageBox.remove();
+
+        messageBox = document.createElement("div");
+        messageBox.id = "messageBox";
+        messageBox.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.4); z-index: 1001;
+            display: flex; align-items: center; justify-content: center;
+        `;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background-color: white; padding: 25px 35px; border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column; align-items: center;
+            max-width: 400px; text-align: center;
+        `;
+
+        content.innerHTML = `
+            <p style="margin: 0 0 20px 0; font-size: 16px; color: ${type === 'error' ? '#dc2626' : '#1e3a8a'}; font-weight: 600;">${message}</p>
+            <button style="
+                padding: 10px 25px; background-color: #2563eb; color: white;
+                border: none; border-radius: 5px; cursor: pointer; font-size: 14px;
+            ">OK</button>
+        `;
+
+        content.querySelector('button').onclick = () => messageBox.remove();
+        messageBox.appendChild(content);
+        document.body.appendChild(messageBox);
+    }
+
+    function displayConfirmBox(message, onConfirm, onCancel) {
+        let messageBox = document.getElementById("messageBox");
+        if (messageBox) messageBox.remove();
+
+        messageBox = document.createElement("div");
+        messageBox.id = "messageBox";
+        messageBox.classList.add("message-box-confirm");
+        messageBox.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.4); z-index: 1001;
+            display: flex; align-items: center; justify-content: center;
+        `;
+
+        const content = document.createElement('div');
+        content.classList.add("content");
+
+        content.innerHTML = `
+            <p>${message}</p>
+            <div class="button-group">
+                <button class="yes-button">Yes</button>
+                <button class="no-button">No</button>
+            </div>
+        `;
+
+        content.querySelector('.yes-button').onclick = () => {
+            messageBox.remove();
+            if (onConfirm) onConfirm();
+        };
+        content.querySelector('.no-button').onclick = () => {
+            messageBox.remove();
+            if (onCancel) onCancel();
+        };
+
+        messageBox.appendChild(content);
+        document.body.appendChild(messageBox);
+    }
+
+    // Initial Load
+    loadDashboardSummary();
+
+});
+</script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Sales Dashboard</title>
+    <title>Purchase Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -54,43 +54,43 @@
             font-size: 20px;
         }
 
-.sidebar {
-    background: #1e3a8a; /* --blue variable */
-    width: 200px;
-    padding: 20px 12px;
-    color: white;
-    position: fixed;
-    top: 66px;
-    bottom: 0;
-    left: 0;
-    overflow-y: auto;
-}
+        .sidebar {
+            background: #1e3a8a; /* --blue variable */
+            width: 200px;
+            padding: 20px 12px;
+            color: white;
+            position: fixed;
+            top: 66px;
+            bottom: 0;
+            left: 0;
+            overflow-y: auto;
+        }
 
-.sidebar a {
-    color: white;
-    text-decoration: none;
-    padding: 12px;
-    display: flex;
-    align-items: center;
-    font-size: 15px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    transition: background-color 0.3s ease;
-}
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease;
+        }
 
-.sidebar a.active {
-    background: #1e40af; /* --blue-dark variable */
-    font-weight: 600;
-}
+        .sidebar a.active {
+            background: #1e40af; /* --blue-dark variable */
+            font-weight: 600;
+        }
 
-.sidebar a svg {
-    margin-right: 7px;
-    stroke-width: 1.5;
-}
+        .sidebar a svg {
+            margin-right: 7px;
+            stroke-width: 1.5;
+        }
 
-.sidebar a:hover {
-    background: #334155;
-}
+        .sidebar a:hover {
+            background: #334155;
+        }
 
         .main {
             margin-left: 230px;
@@ -144,7 +144,7 @@
             align-items: center;
             justify-content: center;
         }
-        .summary-card .icon-container.sales-amount { background-color: #e0e7ff; color: #4338ca; }
+        .summary-card .icon-container.purchase-amount { background-color: #e0e7ff; color: #4338ca; }
         .summary-card .icon-container.vat-amount { background-color: #d1fae5; color: #047857; }
         .summary-card .icon-container.total-amount { background-color: #f3e8ff; color: #7e22ce; }
 
@@ -214,7 +214,7 @@
             width: 100%;
         }
 
-        .sales-records-container {
+        .purchase-records-container {
             background-color: var(--white);
             padding: 24px;
             border-radius: 12px;
@@ -319,13 +319,13 @@
             position: relative;
         }
 
-        .sales-table {
+        .purchase-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
         }
 
-        .sales-table thead th {
+        .purchase-table thead th {
             padding: 12px 16px;
             text-align: left;
             font-weight: 500;
@@ -339,46 +339,46 @@
             z-index: 1;
         }
 
-        .sales-table td {
+        .purchase-table td {
             padding: 16px;
             border-bottom: 1px solid var(--gray-border);
             color: var(--text-dark);
             vertical-align: middle;
         }
         
-        .sales-table tbody tr:last-child td {
+        .purchase-table tbody tr:last-child td {
             border-bottom: none;
         }
         
-        .sales-table tfoot {
+        .purchase-table tfoot {
             position: sticky;
             bottom: 0;
             z-index: 1;
         }
 
-        .sales-table tfoot tr {
+        .purchase-table tfoot tr {
             background-color: var(--gray-bg);
             font-weight: bold;
         }
         
-        .sales-table tfoot td {
+        .purchase-table tfoot td {
             border-bottom: none;
             color: var(--text-dark);
             padding: 16px;
         }
 
-        .sales-table .total-amount {
+        .purchase-table .total-amount {
             font-weight: 600;
         }
 
-        .sales-table .actions a {
+        .purchase-table .actions a {
             color: var(--chart-primary-blue);
             display: inline-flex;
             padding: 4px;
             border-radius: 4px;
             transition: background-color 0.2s;
         }
-        .sales-table .actions a:hover {
+        .purchase-table .actions a:hover {
             background-color: #dbeafe; /* blue-100 */
         }
 
@@ -389,43 +389,6 @@
             padding-top: 20px;
             font-size: 14px;
             color: var(--text-gray);
-        }
-
-        .pagination {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .pagination a, .pagination span {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            color: var(--text-gray);
-            min-width: 36px;
-            height: 36px;
-            padding: 0 8px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        
-        .pagination a:hover {
-            background-color: var(--gray-bg);
-            color: var(--text-dark);
-        }
-
-        .pagination a.active {
-            background-color: var(--chart-primary-blue);
-            color: var(--white);
-            border-color: var(--chart-primary-blue);
-        }
-
-        .pagination a.disabled {
-            color: var(--gray-light-text);
-            pointer-events: none;
-            cursor: default;
         }
 
         @media (max-width: 768px) {
@@ -440,14 +403,14 @@
 </head>
 <body>
     <div class="header">
-        <div class="brand">📘 Sales Dashboard</div>
+        <div class="brand">📦 New Dashboard</div>
     </div>
 
 <div class="sidebar">
     <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev"   target="self"><i data-lucide="layout-dashboard"></i>Dashboard</a>
-    <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=sales"class="active" target="self">
+    <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=sales" target="self">
     <i data-lucide="shopping-cart"></i>Sales</a>
-    <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=purchase"><i data-lucide="package"></i>Purchase</a>
+    <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=purchase" class="active" ><i data-lucide="package"></i>Purchase</a>
     <a href="#"><i data-lucide="file-text"></i>VAT</a>
     <a href="https://script.google.com/macros/s/AKfycbzGKZOrFVLSDvpPGGrGHR_x2BXNBrKiU_of-WlJPw-P/dev?page=ledger"><i data-lucide="book-open"></i>Ledger</a>
     <a href="#"><i data-lucide="calendar"></i>Reports</a>
@@ -457,19 +420,19 @@
     <div class="main">
         <div class="page-header">
             <div class="title-group">
-                <h1>Sales Overview</h1>
-                <p>An overview of your business performance</p>
+                <h1>Purchase Overview</h1>
+                <p>An overview of your business expenditures</p>
             </div>
         </div>
 
         <div class="summary-grid">
              <div class="summary-card">
-                <div class="icon-container sales-amount">
+                <div class="icon-container purchase-amount">
                     <i data-lucide="dollar-sign"></i>
                 </div>
                 <div class="info">
-                    <h3>Total Sales</h3>
-                    <p class="value" id="sales-amount-value">Loading...</p>
+                    <h3>Total Purchases</h3>
+                    <p class="value" id="purchase-amount-value">Loading...</p>
                 </div>
             </div>
             <div class="summary-card">
@@ -495,29 +458,29 @@
         <div class="chart-container">
              <div class="chart-header">
                 <div class="title">
-                    <h2>Monthly Sales Performance</h2>
-                    <p>Track your sales trends over time</p>
+                    <h2>Monthly Purchase Performance</h2>
+                    <p>Track your purchase trends over time</p>
                 </div>
                 <div class="chart-toggle">
                     <button id="barChartBtn" class="active">Bar</button>
                     <button id="lineChartBtn">Line</button>
                 </div>
             </div>
-            <div class="chart-area" id="salesChart">
-                <canvas id="mySalesChart"></canvas>
+            <div class="chart-area" id="purchaseChartArea">
+                <canvas id="myPurchaseChart"></canvas>
             </div>
         </div>
 
-        <div class="sales-records-container">
+        <div class="purchase-records-container">
             <div class="records-header">
                 <div class="title">
-                    <h2>View Recent Sales</h2>
+                    <h2>View Recent Purchases</h2>
                     <p>Browse through your detailed transaction history</p>
                 </div>
                 <div class="records-actions">
                     <div class="search-wrapper">
                         <i data-lucide="search" size="18"></i>
-                        <input type="text" class="search-input" placeholder="Search records...">
+                        <input type="text" class="search-input" placeholder="Search purchases...">
                     </div>
                     <button class="export-btn">
                         <i data-lucide="download" size="16"></i>
@@ -528,8 +491,8 @@
 
             <div class="filter-bar">
                 <label>Filter by:</label>
-                <select id="clientFilterSelect">
-                    <option>All Clients</option>
+                <select id="supplierFilterSelect">
+                    <option>All Suppliers</option>
                 </select>
                 <select id="monthFilterSelect">
                     <option value="All">All Months</option>
@@ -549,30 +512,30 @@
             </div>
 
             <div class="table-wrapper">
-                <table class="sales-table">
+                <table class="purchase-table">
                     <thead>
                         <tr>
                             <th>Date (BS)</th>
                             <th>Bill No.</th>
-                            <th>Client Name</th>
+                            <th>Supplier Name</th>
                             <th>PAN No.</th>
-                            <th>Sales Amount</th>
+                            <th>Type</th>
+                            <th>Purchase Amount</th>
                             <th>VAT</th>
                             <th>Total</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="salesDataBody">
-                       <tr><td colspan="8" style="text-align: center; padding: 20px;">Loading recent sales...</td></tr>
+                    <tbody id="purchaseDataBody">
+                       <tr><td colspan="9" style="text-align: center; padding: 20px;">Loading recent purchases...</td></tr>
                     </tbody>
-                    <tfoot id="salesTableFooter">
-                        </tfoot>
+                    <tfoot id="purchaseTableFooter">
+                    </tfoot>
                 </table>
             </div>
 
             <div class="records-footer">
                 <span id="results-info-span">Showing results...</span>
-                <!-- Pagination removed -->
             </div>
         </div>
     </div>
@@ -582,7 +545,7 @@
         lucide.createIcons();
 
         // --- Global variables ---
-        let salesChart;
+        let purchaseChart;
         let chartData = [];
         let currentChartType = 'bar';
         const pageSize = 5; // Records to show per page
@@ -593,12 +556,12 @@
         // --- DOM Elements ---
         const barChartBtn = document.getElementById('barChartBtn');
         const lineChartBtn = document.getElementById('lineChartBtn');
-        const canvas = document.getElementById('mySalesChart');
-        const clientFilterSelect = document.getElementById('clientFilterSelect');
+        const canvas = document.getElementById('myPurchaseChart');
+        const supplierFilterSelect = document.getElementById('supplierFilterSelect');
         const monthFilterSelect = document.getElementById('monthFilterSelect');
         const tableWrapper = document.querySelector('.table-wrapper');
-        const tableBody = document.getElementById('salesDataBody');
-        const tableFooter = document.getElementById('salesTableFooter');
+        const tableBody = document.getElementById('purchaseDataBody');
+        const tableFooter = document.getElementById('purchaseTableFooter');
         const resultsInfoSpan = document.getElementById('results-info-span');
 
         // --- Helper functions ---
@@ -607,25 +570,25 @@
 
         // --- Main function to load all dashboard data ---
         function loadDashboardData() {
-            google.script.run.withSuccessHandler(updateSummaryCards).getTotalSalesSummary();
-            google.script.run.withSuccessHandler(populateClientFilter).getSalesbookClientList();
+            google.script.run.withSuccessHandler(updateSummaryCards).getTotalPurchaseSummary();
+            google.script.run.withSuccessHandler(populateSupplierFilter).getPurchasebookSupplierList();
             
             google.script.run.withSuccessHandler(data => {
                 chartData = data;
                 renderChart();
-            }).withFailureHandler(handleError("Chart Data")).getSalesDataForChart();
+            }).withFailureHandler(handleError("Chart Data")).getPurchaseDataForChart();
             
             // Initial data load for the table on page 1
             loadTableData(1);
         }
 
-        // --- Function to fetch and display sales data ---
+        // --- Function to fetch and display purchase data ---
         function loadTableData(page) {
             if (isLoadingMore) return;
             isLoadingMore = true;
 
             const filters = {
-                clientName: clientFilterSelect.value,
+                supplierName: supplierFilterSelect.value,
                 nepaliMonth: monthFilterSelect.value
             };
 
@@ -638,7 +601,7 @@
                     if (page === 1) {
                        tableBody.innerHTML = '';
                     }
-                    appendSalesTable(response.records);
+                    appendPurchaseTable(response.records);
                     updateTableFooter(response.totals, response.pagination.totalRecords);
                     
                     currentPage = response.pagination.currentPage;
@@ -648,47 +611,49 @@
                     updateResultsInfo(response.pagination.totalRecords);
                     if (page === 1) setLoadingState(false);
                 })
-                .withFailureHandler(handleError("Sales Records"))
-                .getSalesRecords(filters, page, pageSize);
+                .withFailureHandler(handleError("Purchase Records"))
+                .getPurchaseRecords(filters, page, pageSize);
         }
 
         // --- Update summary cards ---
         function updateSummaryCards(summary) {
-            document.getElementById('sales-amount-value').textContent = formatToRupees(summary.totalSales);
+            document.getElementById('purchase-amount-value').textContent = formatToRupees(summary.totalPurchases);
             document.getElementById('vat-amount-value').textContent = formatToRupees(summary.totalVat);
             document.getElementById('total-amount-value').textContent = formatToRupees(summary.grandTotal);
         }
         
-        // --- Populate the client filter dropdown ---
-        function populateClientFilter(clientNames) {
-            if (!clientNames || clientNames.length === 0) return;
-            clientNames.forEach(name => {
+        // --- Populate the supplier filter dropdown ---
+        function populateSupplierFilter(supplierNames) {
+            if (!supplierNames || supplierNames.length === 0) return;
+            supplierNames.forEach(name => {
                 const option = document.createElement('option');
                 option.value = name;
                 option.textContent = name;
-                clientFilterSelect.appendChild(option);
+                supplierFilterSelect.appendChild(option);
             });
         }
         
-        // --- Append rows to sales table ---
-        function appendSalesTable(records) {
+        // --- Append rows to purchase table ---
+        function appendPurchaseTable(records) {
             if (!records || records.length === 0) {
                 if (currentPage === 1) { // Only show if it's the first page and it's empty
-                    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">No sales records found for the selected filters.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px;">No purchase records found for the selected filters.</td></tr>';
                 }
             } else {
-                records.forEach(sale => {
+                records.forEach(purchase => {
                     const row = document.createElement('tr');
+                    // Assumed purchase data structure: [sn, billNo, dateAD, dateBS, supplierName, panNo, purchaseType, purchaseAmount, vat, total]
                     row.innerHTML = `
-                        <td>${sale[3] || ''}</td>
-                        <td>${sale[1]}</td>
-                        <td>${sale[4]}</td>
-                        <td>${sale[5]}</td>
-                        <td>${formatToRupees(sale[6])}</td>
-                        <td>${formatToRupees(sale[7])}</td>
-                        <td class="total-amount">${formatToRupees(sale[8])}</td>
+                        <td>${purchase[3] || ''}</td>
+                        <td>${purchase[1]}</td>
+                        <td>${purchase[4]}</td>
+                        <td>${purchase[5]}</td>
+                        <td>${purchase[6]}</td>
+                        <td>${formatToRupees(purchase[7])}</td>
+                        <td>${formatToRupees(purchase[8])}</td>
+                        <td class="total-amount">${formatToRupees(purchase[9])}</td>
                         <td class="actions">
-                            <a href="#" onclick="editRecord(${sale[0]})" title="Edit"><i data-lucide="pencil" size="16"></i></a>
+                            <a href="#" onclick="editRecord(${purchase[0]})" title="Edit"><i data-lucide="pencil" size="16"></i></a>
                         </td>
                     `;
                     tableBody.appendChild(row);
@@ -703,8 +668,8 @@
             if (totals) {
                 const totalRow = document.createElement('tr');
                 totalRow.innerHTML = `
-                    <td colspan="4"><strong>Grand Total (${totalRecords} records)</strong></td>
-                    <td><strong>${formatToRupees(totals.totalSales)}</strong></td>
+                    <td colspan="5"><strong>Grand Total (${totalRecords} records)</strong></td>
+                    <td><strong>${formatToRupees(totals.totalPurchases)}</strong></td>
                     <td><strong>${formatToRupees(totals.totalVat)}</strong></td>
                     <td class="total-amount"><strong>${formatToRupees(totals.grandTotal)}</strong></td>
                     <td></td>
@@ -726,25 +691,25 @@
         // --- Render the chart ---
         function renderChart() {
             if (!chartData || chartData.length === 0 || !canvas) {
-                const chartArea = document.getElementById('salesChart');
+                const chartArea = document.getElementById('purchaseChartArea');
                 if (chartArea) {
                     chartArea.innerHTML = '<p style="text-align:center; color: var(--text-gray); padding-top: 50px;">No data available to display the chart.</p>';
                 }
                 return;
             }
 
-            if (salesChart) salesChart.destroy();
+            if (purchaseChart) purchaseChart.destroy();
 
             const labels = chartData.map(d => d.month);
-            const dataValues = chartData.map(d => d.sales);
+            const dataValues = chartData.map(d => d.purchases);
             const ctx = canvas.getContext('2d');
 
-            salesChart = new Chart(ctx, {
+            purchaseChart = new Chart(ctx, {
                 type: currentChartType,
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Sales',
+                        label: 'Purchases',
                         data: dataValues,
                         backgroundColor: currentChartType === 'bar' ? '#1e3a8a' : 'rgba(37, 99, 235, 0.15)',
                         borderColor: '#1e3a8a',
@@ -774,14 +739,14 @@
         function setLoadingState(isLoading) {
             if (isLoading) {
                 resultsInfoSpan.textContent = 'Fetching data...';
-                tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">Loading sales data...</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 20px;">Loading purchase data...</td></tr>';
             }
         }
 
         function handleError(source) {
             return (error) => {
                 console.error(`${source} Error:`, error);
-                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: #ef4444; padding: 20px;">Error loading ${source.toLowerCase()}. Please try again.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color: #ef4444; padding: 20px;">Error loading ${source.toLowerCase()}. Please try again.</td></tr>`;
                 isLoadingMore = false;
             };
         }
@@ -810,7 +775,7 @@
             loadTableData(1);
         }
 
-        clientFilterSelect.addEventListener('change', resetAndLoad);
+        supplierFilterSelect.addEventListener('change', resetAndLoad);
         monthFilterSelect.addEventListener('change', resetAndLoad);
 
         tableWrapper.addEventListener('scroll', () => {
@@ -824,7 +789,7 @@
 
         window.editRecord = function(sn) {
             console.log("Editing record with SN:", sn);
-            alert("Edit functionality for SN " + sn + " is not yet implemented.");
+            alert("Edit functionality for purchase SN " + sn + " is not yet implemented.");
         }
 
         // --- Initial Data Load ---
